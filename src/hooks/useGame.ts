@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { PORTUGUESE_WORDS } from '../data/words';
 import { toast } from '@/hooks/use-toast';
@@ -96,7 +95,15 @@ export const useGame = () => {
   }, [guesses, currentGuess, gameStatus, currentRow, letterStatuses]);
 
   const isValidWord = (word: string): boolean => {
-    return PORTUGUESE_WORDS.includes(word.toLowerCase());
+    // Convert both to lowercase for comparison
+    const normalizedWord = word.toLowerCase();
+    console.log('Checking word:', normalizedWord);
+    console.log('Available words sample:', PORTUGUESE_WORDS.slice(0, 10));
+    
+    const isValid = PORTUGUESE_WORDS.includes(normalizedWord);
+    console.log('Word is valid:', isValid);
+    
+    return isValid;
   };
 
   const getLetterStatus = (letter: string, position: number, word: string): LetterStatus => {
@@ -149,6 +156,8 @@ export const useGame = () => {
   };
 
   const submitGuess = useCallback(() => {
+    console.log('Submitting guess:', currentGuess);
+    
     if (currentGuess.length !== WORD_LENGTH) {
       toast({
         title: "Palavra incompleta",
@@ -171,7 +180,8 @@ export const useGame = () => {
     setGuesses(newGuesses);
     updateLetterStatuses(currentGuess);
 
-    if (currentGuess === targetWord.toUpperCase()) {
+    // Convert both to uppercase for comparison
+    if (currentGuess.toUpperCase() === targetWord.toUpperCase()) {
       setGameStatus('won');
       updateStats(true, newGuesses.length);
       toast({
