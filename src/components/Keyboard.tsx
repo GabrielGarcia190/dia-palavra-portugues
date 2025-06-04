@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 
 interface KeyboardProps {
   onKeyPress: (key: string) => void;
+  onLetterInput: (letter: string) => void;
+  onBackspaceAtPosition: () => void;
   letterStatuses: Record<string, LetterStatus>;
   disabled: boolean;
 }
@@ -19,6 +21,8 @@ const KEYBOARD_ROWS = [
 
 export const Keyboard: React.FC<KeyboardProps> = ({
   onKeyPress,
+  onLetterInput,
+  onBackspaceAtPosition,
   letterStatuses,
   disabled
 }) => {
@@ -26,11 +30,23 @@ export const Keyboard: React.FC<KeyboardProps> = ({
     return letterStatuses[key] || 'unused';
   };
 
+  const handleKeyClick = (key: string) => {
+    if (disabled) return;
+    
+    if (key === 'ENTER') {
+      onKeyPress('ENTER');
+    } else if (key === 'BACKSPACE') {
+      onBackspaceAtPosition();
+    } else {
+      onLetterInput(key);
+    }
+  };
+
   const getKeyClassName = (key: string) => {
     const status = getKeyStatus(key);
     
     return cn(
-      'h-14 font-semibold text-sm transition-all duration-200',
+      'h-14 font-semibold text-sm transition-all duration-200 rounded-md',
       {
         // Special keys
         'flex-1 min-w-0': key === 'ENTER' || key === 'BACKSPACE',
@@ -40,7 +56,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
         'bg-green-500 hover:bg-green-600 text-white border-green-500': status === 'correct',
         'bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500': status === 'present',
         'bg-gray-500 hover:bg-gray-600 text-white border-gray-500': status === 'absent',
-        'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600': status === 'unused',
+        'bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-900 dark:text-white border-gray-300 dark:border-gray-500': status === 'unused',
         
         // Disabled state
         'opacity-50 cursor-not-allowed': disabled,
@@ -50,14 +66,14 @@ export const Keyboard: React.FC<KeyboardProps> = ({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 p-4 border-t border-gray-200 dark:border-gray-700">
+    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-600">
       <div className="max-w-lg mx-auto space-y-2">
         {KEYBOARD_ROWS.map((row, rowIndex) => (
           <div key={rowIndex} className="flex gap-1 justify-center">
             {row.map((key) => (
               <Button
                 key={key}
-                onClick={() => !disabled && onKeyPress(key)}
+                onClick={() => handleKeyClick(key)}
                 disabled={disabled}
                 variant="outline"
                 className={getKeyClassName(key)}

@@ -15,8 +15,12 @@ const Index = () => {
     gameStatus,
     currentRow,
     letterStatuses,
+    selectedPosition,
     targetWord,
     handleKeyPress,
+    handleTileClick,
+    handleLetterInput,
+    handleBackspaceAtPosition,
     resetGame,
     stats
   } = useGame();
@@ -44,15 +48,15 @@ const Index = () => {
       if (key === 'enter') {
         handleKeyPress('ENTER');
       } else if (key === 'backspace') {
-        handleKeyPress('BACKSPACE');
+        handleBackspaceAtPosition();
       } else if (/^[a-z]$/.test(key)) {
-        handleKeyPress(key.toUpperCase());
+        handleLetterInput(key.toUpperCase());
       }
     };
 
     window.addEventListener('keydown', handleKeyboard);
     return () => window.removeEventListener('keydown', handleKeyboard);
-  }, [handleKeyPress]);
+  }, [handleKeyPress, handleLetterInput, handleBackspaceAtPosition]);
 
   // Show stats when game ends
   useEffect(() => {
@@ -66,7 +70,7 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
-      darkMode ? 'dark bg-gray-900' : 'bg-gray-50'
+      darkMode ? 'dark bg-gray-800' : 'bg-gray-50'
     }`}>
       <div className="max-w-lg mx-auto px-4">
         <Header 
@@ -83,10 +87,14 @@ const Index = () => {
             currentRow={currentRow}
             targetWord={targetWord}
             gameStatus={gameStatus}
+            selectedPosition={selectedPosition}
+            onTileClick={handleTileClick}
           />
           
           <Keyboard 
             onKeyPress={handleKeyPress}
+            onLetterInput={handleLetterInput}
+            onBackspaceAtPosition={handleBackspaceAtPosition}
             letterStatuses={letterStatuses}
             disabled={gameStatus !== 'playing'}
           />

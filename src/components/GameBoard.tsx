@@ -9,6 +9,8 @@ interface GameBoardProps {
   currentRow: number;
   targetWord: string;
   gameStatus: GameStatus;
+  selectedPosition: number;
+  onTileClick: (position: number) => void;
 }
 
 const MAX_GUESSES = 6;
@@ -19,7 +21,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   currentGuess,
   currentRow,
   targetWord,
-  gameStatus
+  gameStatus,
+  selectedPosition,
+  onTileClick
 }) => {
   const rows = Array.from({ length: MAX_GUESSES }, (_, index) => {
     if (index < guesses.length) {
@@ -32,7 +36,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   });
 
   return (
-    <div className="grid gap-1 mb-8 max-w-sm mx-auto">
+    <div className="grid gap-2 mb-8 max-w-sm mx-auto">
       {rows.map((row, index) => (
         <GameRow
           key={index}
@@ -41,6 +45,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           isCurrentRow={index === currentRow && gameStatus === 'playing'}
           isSubmitted={index < guesses.length}
           rowIndex={index}
+          selectedPosition={selectedPosition}
+          onTileClick={onTileClick}
         />
       ))}
     </div>

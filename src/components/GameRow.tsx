@@ -8,6 +8,8 @@ interface GameRowProps {
   isCurrentRow: boolean;
   isSubmitted: boolean;
   rowIndex: number;
+  selectedPosition?: number;
+  onTileClick?: (position: number) => void;
 }
 
 export const GameRow: React.FC<GameRowProps> = ({
@@ -15,10 +17,12 @@ export const GameRow: React.FC<GameRowProps> = ({
   targetWord,
   isCurrentRow,
   isSubmitted,
-  rowIndex
+  rowIndex,
+  selectedPosition,
+  onTileClick
 }) => {
   return (
-    <div className="grid grid-cols-5 gap-1">
+    <div className="grid grid-cols-5 gap-2">
       {Array.from({ length: 5 }, (_, index) => {
         const letter = word[index] || '';
         return (
@@ -31,6 +35,8 @@ export const GameRow: React.FC<GameRowProps> = ({
             isSubmitted={isSubmitted}
             tileIndex={index}
             rowIndex={rowIndex}
+            isSelected={isCurrentRow && selectedPosition === index}
+            onClick={() => isCurrentRow && onTileClick?.(index)}
           />
         );
       })}

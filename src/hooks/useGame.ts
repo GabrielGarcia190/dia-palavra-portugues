@@ -62,6 +62,7 @@ export const useGame = () => {
   const [currentRow, setCurrentRow] = useState(0);
   const [letterStatuses, setLetterStatuses] = useState<Record<string, LetterStatus>>({});
   const [stats, setStats] = useState<GameStats>(getInitialStats);
+  const [selectedPosition, setSelectedPosition] = useState<number>(0);
 
   // Load saved game state
   useEffect(() => {
@@ -95,7 +96,6 @@ export const useGame = () => {
   }, [guesses, currentGuess, gameStatus, currentRow, letterStatuses]);
 
   const isValidWord = (word: string): boolean => {
-    // Convert both to lowercase for comparison
     const normalizedWord = word.toLowerCase();
     console.log('Checking word:', normalizedWord);
     console.log('Available words sample:', PORTUGUESE_WORDS.slice(0, 10));
@@ -180,7 +180,6 @@ export const useGame = () => {
     setGuesses(newGuesses);
     updateLetterStatuses(currentGuess);
 
-    // Convert both to uppercase for comparison
     if (currentGuess.toUpperCase() === targetWord.toUpperCase()) {
       setGameStatus('won');
       updateStats(true, newGuesses.length);
@@ -200,6 +199,7 @@ export const useGame = () => {
 
     setCurrentGuess('');
     setCurrentRow(currentRow + 1);
+    setSelectedPosition(0);
   }, [currentGuess, guesses, targetWord, currentRow, letterStatuses, stats]);
 
   const handleKeyPress = useCallback((key: string) => {
@@ -208,11 +208,56 @@ export const useGame = () => {
     if (key === 'ENTER') {
       submitGuess();
     } else if (key === 'BACKSPACE') {
-      setCurrentGuess(prev => prev.slice(0, -1));
+      if (currentGuess.length > 0) {
+        const newGuess = currentGuess.slice(0, -1);
+        setCurrentGuess(newGuess);
+        setSelectedPosition(Math.max(0, newGuess.length));
+      }
     } else if (/^[A-Z]$/.test(key) && currentGuess.length < WORD_LENGTH) {
       setCurrentGuess(prev => prev + key);
+      setSelectedPosition(currentGuess.length + 1);
     }
   }, [gameStatus, currentGuess, submitGuess]);
+
+  const handleTileClick = useCallback((position: number) => {
+    if (gameStatus !== 'playing') return;
+    setSelectedPosition(position);
+  }, [gameStatus]);
+
+  const handleLetterInput = useCallback((letter: string) => {
+    if (gameStatus !== 'playing') return;
+    
+    const newGuess = currentGuess.split('');
+    newGuess[selectedPosition] = letter;
+    
+    // Fill empty spaces up to selected position
+    for (let i = 0; i < selectedPosition; i++) {
+      if (!newGuess[i]) newGuess[i] = ' ';
+    }
+    
+    const updatedGuess = newGuess.join('').replace(/ /g, '');
+    setCurrentGuess(updatedGuess);
+    
+    // Move to next position if not at the end
+    if (selectedPosition < WORD_LENGTH - 1) {
+      setSelectedPosition(selectedPosition + 1);
+    }
+  }, [gameStatus, currentGuess, selectedPosition]);
+
+  const handleBackspaceAtPosition = useCallback(() => {
+    if (gameStatus !== 'playing') return;
+    
+    if (selectedPosition < currentGuess.length) {
+      // Remove letter at selected position
+      const newGuess = currentGuess.split('');
+      newGuess.splice(selectedPosition, 1);
+      setCurrentGuess(newGuess.join(''));
+    } else if (selectedPosition > 0 && currentGuess.length > 0) {
+      // Remove last letter and move selection back
+      setCurrentGuess(currentGuess.slice(0, -1));
+      setSelectedPosition(selectedPosition - 1);
+    }
+  }, [gameStatus, currentGuess, selectedPosition]);
 
   const resetGame = () => {
     setGuesses([]);
@@ -220,6 +265,7 @@ export const useGame = () => {
     setGameStatus('playing');
     setCurrentRow(0);
     setLetterStatuses({});
+    setSelectedPosition(0);
     localStorage.removeItem('currentGame');
   };
 
@@ -229,8 +275,12 @@ export const useGame = () => {
     gameStatus,
     currentRow,
     letterStatuses,
+    selectedPosition,
     targetWord: targetWord.toUpperCase(),
     handleKeyPress,
+    handleTileClick,
+    handleLetterInput,
+    handleBackspaceAtPosition,
     resetGame,
     stats
   };

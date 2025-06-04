@@ -10,6 +10,8 @@ interface GameTileProps {
   isSubmitted: boolean;
   tileIndex: number;
   rowIndex: number;
+  isSelected?: boolean;
+  onClick?: () => void;
 }
 
 export const GameTile: React.FC<GameTileProps> = ({
@@ -19,7 +21,9 @@ export const GameTile: React.FC<GameTileProps> = ({
   isCurrentRow,
   isSubmitted,
   tileIndex,
-  rowIndex
+  rowIndex,
+  isSelected = false,
+  onClick
 }) => {
   const getStatus = () => {
     if (!isSubmitted) return 'empty';
@@ -44,30 +48,27 @@ export const GameTile: React.FC<GameTileProps> = ({
   return (
     <div
       className={cn(
-        'w-14 h-14 border-2 flex items-center justify-center text-2xl font-bold transition-all duration-300',
+        'w-14 h-14 border-2 rounded-lg flex items-center justify-center text-2xl font-bold transition-all duration-300 cursor-pointer',
         {
           // Empty state
-          'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800': !hasLetter && !isSubmitted,
+          'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700': !hasLetter && !isSubmitted,
           
           // Current row with letter
-          'border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-800 scale-105': hasLetter && isCurrentRow,
+          'border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 scale-105': hasLetter && isCurrentRow && !isSelected,
           
-          // Submitted states
-          'border-green-500 bg-green-500 text-white animate-pulse': status === 'correct',
+          // Selected state
+          'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-400 scale-110': isSelected,
+          
+          // Submitted states (removed animate-pulse from correct)
+          'border-green-500 bg-green-500 text-white': status === 'correct',
           'border-yellow-500 bg-yellow-500 text-white': status === 'present',
           'border-gray-500 bg-gray-500 text-white': status === 'absent',
-          
-          // Animation delays for reveal effect
-          'animation-delay-0': tileIndex === 0,
-          'animation-delay-75': tileIndex === 1,
-          'animation-delay-150': tileIndex === 2,
-          'animation-delay-300': tileIndex === 3,
-          'animation-delay-500': tileIndex === 4,
         }
       )}
       style={{
         animationDelay: isSubmitted ? `${tileIndex * 100}ms` : '0ms'
       }}
+      onClick={onClick}
     >
       <span className="text-gray-900 dark:text-white">
         {letter.trim().toUpperCase()}
