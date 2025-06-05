@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { FIVE_LETTER_WORDS } from '../data/words';
 import { toast } from '@/hooks/use-toast';
@@ -72,17 +73,16 @@ export const useGameLogic = (
           break;
         }
         // If a letter is present but not already marked as correct
-        else if (status === 'present' && bestStatus !== 'correct') {
+        else if (status === 'present' && bestStatus === 'absent') {
           bestStatus = 'present';
         }
       }
       
       // Only update if the new status is better than the current one
       const currentStatus = newStatuses[letter];
-      if (!currentStatus || 
-          (currentStatus === 'absent' && bestStatus !== 'absent') ||
-          (currentStatus === 'present' && bestStatus === 'correct') ||
-          (currentStatus === 'unused' && bestStatus !== 'unused')) {
+      if (!currentStatus || currentStatus === 'unused' ||
+          (currentStatus === 'absent' && (bestStatus === 'present' || bestStatus === 'correct')) ||
+          (currentStatus === 'present' && bestStatus === 'correct')) {
         newStatuses[letter] = bestStatus;
       }
     }
