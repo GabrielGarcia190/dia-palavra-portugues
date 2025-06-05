@@ -57,7 +57,7 @@ const getTodaysWord = (): string => {
 export const useGameState = () => {
   const [targetWord] = useState(() => getTodaysWord());
   const [guesses, setGuesses] = useState<string[]>([]);
-  const [currentGuess, setCurrentGuess] = useState('');
+  const [currentGuess, setCurrentGuess] = useState(' '.repeat(WORD_LENGTH));
   const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
   const [currentRow, setCurrentRow] = useState(0);
   const [letterStatuses, setLetterStatuses] = useState<Record<string, LetterStatus>>({});
@@ -73,7 +73,7 @@ export const useGameState = () => {
       const gameData = JSON.parse(savedGame);
       if (gameData.date === today) {
         setGuesses(gameData.guesses || []);
-        setCurrentGuess(gameData.currentGuess || '');
+        setCurrentGuess(gameData.currentGuess || ' '.repeat(WORD_LENGTH));
         setGameStatus(gameData.gameStatus || 'playing');
         setCurrentRow(gameData.currentRow || 0);
         setLetterStatuses(gameData.letterStatuses || {});

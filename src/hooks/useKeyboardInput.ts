@@ -14,44 +14,40 @@ export const useKeyboardInput = (
   const handleLetterInput = useCallback((letter: string) => {
     if (gameStatus !== 'playing') return;
     
-    const newGuess = currentGuess.split('');
-    
-    // Ensure array has enough length
-    while (newGuess.length < WORD_LENGTH) {
-      newGuess.push('');
-    }
+    // Create array with exact length, filling with spaces if needed
+    const newGuess = Array.from({ length: WORD_LENGTH }, (_, i) => 
+      i < currentGuess.length ? currentGuess[i] : ' '
+    );
     
     // Insert letter at selected position
     newGuess[selectedPosition] = letter;
     
-    const updatedGuess = newGuess.join('').slice(0, WORD_LENGTH);
+    const updatedGuess = newGuess.join('');
     setCurrentGuess(updatedGuess);
     
-    // Move to next position if not at the end
-    if (selectedPosition < WORD_LENGTH - 1) {
-      setSelectedPosition(selectedPosition + 1);
+    // Move to next empty position or next position if not at the end
+    let nextPosition = selectedPosition + 1;
+    if (nextPosition < WORD_LENGTH) {
+      setSelectedPosition(nextPosition);
     }
-  }, [gameStatus, currentGuess, selectedPosition, WORD_LENGTH]);
+  }, [gameStatus, currentGuess, selectedPosition, WORD_LENGTH, setCurrentGuess, setSelectedPosition]);
 
   const handleBackspaceAtPosition = useCallback(() => {
     if (gameStatus !== 'playing') return;
     
-    const newGuess = currentGuess.split('');
+    // Create array with exact length, preserving existing letters
+    const newGuess = Array.from({ length: WORD_LENGTH }, (_, i) => 
+      i < currentGuess.length ? currentGuess[i] : ' '
+    );
     
-    // Remove letter at selected position
-    if (selectedPosition < newGuess.length && newGuess[selectedPosition]) {
-      newGuess[selectedPosition] = '';
-      setCurrentGuess(newGuess.join('').replace(/\s+$/, '')); // Remove trailing spaces
-    } else if (selectedPosition > 0) {
-      // Move back and remove previous letter
-      const prevPos = selectedPosition - 1;
-      if (newGuess[prevPos]) {
-        newGuess[prevPos] = '';
-        setCurrentGuess(newGuess.join('').replace(/\s+$/, ''));
-        setSelectedPosition(prevPos);
-      }
-    }
-  }, [gameStatus, currentGuess, selectedPosition]);
+    // Remove letter at selected position only - don't shift other letters
+    newGuess[selectedPosition] = ' ';
+    
+    const updatedGuess = newGuess.join('');
+    setCurrentGuess(updatedGuess);
+    
+    // Don't move position when deleting
+  }, [gameStatus, currentGuess, selectedPosition, WORD_LENGTH, setCurrentGuess]);
 
   const handleArrowNavigation = useCallback((direction: 'left' | 'right') => {
     if (gameStatus !== 'playing') return;
@@ -61,7 +57,7 @@ export const useKeyboardInput = (
     } else if (direction === 'right' && selectedPosition < WORD_LENGTH - 1) {
       setSelectedPosition(selectedPosition + 1);
     }
-  }, [gameStatus, selectedPosition, WORD_LENGTH]);
+  }, [gameStatus, selectedPosition, WORD_LENGTH, setSelectedPosition]);
 
   const handleKeyPress = useCallback((key: string) => {
     if (gameStatus !== 'playing') return;
@@ -82,7 +78,7 @@ export const useKeyboardInput = (
   const handleTileClick = useCallback((position: number) => {
     if (gameStatus !== 'playing') return;
     setSelectedPosition(position);
-  }, [gameStatus]);
+  }, [gameStatus, setSelectedPosition]);
 
   return {
     handleKeyPress,

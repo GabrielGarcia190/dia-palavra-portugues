@@ -32,9 +32,9 @@ export const useGameLogic = (
   WORD_LENGTH: number
 ) => {
   const isValidWord = (word: string): boolean => {
-    const normalizedWord = word.toLowerCase();
-    console.log('Checking word:', normalizedWord);
-    const isValid = PORTUGUESE_WORDS.includes(normalizedWord);
+    const cleanWord = word.replace(/\s/g, '').toLowerCase();
+    console.log('Checking word:', cleanWord);
+    const isValid = PORTUGUESE_WORDS.includes(cleanWord);
     console.log('Word is valid:', isValid);
     return isValid;
   };
@@ -58,6 +58,8 @@ export const useGameLogic = (
     
     for (let i = 0; i < word.length; i++) {
       const letter = word[i];
+      if (letter === ' ') continue; // Skip spaces
+      
       const status = getLetterStatus(letter, i, word);
       
       if (!newStatuses[letter] || 
@@ -88,9 +90,10 @@ export const useGameLogic = (
   };
 
   const submitGuess = useCallback(() => {
-    console.log('Submitting guess:', currentGuess);
+    const cleanGuess = currentGuess.replace(/\s/g, '');
+    console.log('Submitting guess:', cleanGuess);
     
-    if (currentGuess.length !== WORD_LENGTH) {
+    if (cleanGuess.length !== WORD_LENGTH) {
       toast({
         title: "Palavra incompleta",
         description: `A palavra deve ter ${WORD_LENGTH} letras`,
@@ -99,7 +102,7 @@ export const useGameLogic = (
       return;
     }
 
-    if (!isValidWord(currentGuess)) {
+    if (!isValidWord(cleanGuess)) {
       toast({
         title: "Palavra inválida",
         description: "Esta palavra não está na nossa lista",
@@ -112,7 +115,7 @@ export const useGameLogic = (
     setGuesses(newGuesses);
     updateLetterStatuses(currentGuess);
 
-    if (currentGuess.toUpperCase() === targetWord.toUpperCase()) {
+    if (cleanGuess.toUpperCase() === targetWord.toUpperCase()) {
       setGameStatus('won');
       updateStats(true, newGuesses.length);
       toast({
@@ -129,14 +132,14 @@ export const useGameLogic = (
       });
     }
 
-    setCurrentGuess('');
+    setCurrentGuess(' '.repeat(WORD_LENGTH));
     setCurrentRow(currentRow + 1);
     setSelectedPosition(0);
   }, [currentGuess, guesses, targetWord, currentRow, letterStatuses, stats, WORD_LENGTH, MAX_GUESSES]);
 
   const resetGame = () => {
     setGuesses([]);
-    setCurrentGuess('');
+    setCurrentGuess(' '.repeat(WORD_LENGTH));
     setGameStatus('playing');
     setCurrentRow(0);
     setLetterStatuses({});

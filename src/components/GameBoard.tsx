@@ -27,9 +27,12 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 }) => {
   const rows = Array.from({ length: MAX_GUESSES }, (_, index) => {
     if (index < guesses.length) {
-      return guesses[index].padEnd(WORD_LENGTH, ' ');
+      // Ensure submitted guesses are exactly WORD_LENGTH characters
+      const guess = guesses[index];
+      return guess.length >= WORD_LENGTH ? guess.slice(0, WORD_LENGTH) : guess.padEnd(WORD_LENGTH, ' ');
     } else if (index === currentRow && gameStatus === 'playing') {
-      return currentGuess.padEnd(WORD_LENGTH, ' ');
+      // Ensure current guess is exactly WORD_LENGTH characters
+      return currentGuess.length >= WORD_LENGTH ? currentGuess.slice(0, WORD_LENGTH) : currentGuess.padEnd(WORD_LENGTH, ' ');
     } else {
       return ' '.repeat(WORD_LENGTH);
     }
