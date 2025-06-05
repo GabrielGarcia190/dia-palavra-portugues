@@ -14,7 +14,7 @@ interface GameBoardProps {
 }
 
 const MAX_GUESSES = 6;
-const WORD_LENGTH = 5;
+const WORD_LENGTH = 5; // Corrigido para 5 letras
 
 export const GameBoard: React.FC<GameBoardProps> = ({
   guesses,
@@ -27,7 +27,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 }) => {
   const rows = Array.from({ length: MAX_GUESSES }, (_, index) => {
     if (index < guesses.length) {
-      return guesses[index];
+      return guesses[index].padEnd(WORD_LENGTH, ' ');
     } else if (index === currentRow && gameStatus === 'playing') {
       return currentGuess.padEnd(WORD_LENGTH, ' ');
     } else {

@@ -49,6 +49,10 @@ const Index = () => {
         handleKeyPress('ENTER');
       } else if (key === 'backspace') {
         handleBackspaceAtPosition();
+      } else if (key === 'arrowleft') {
+        handleKeyPress('ARROWLEFT');
+      } else if (key === 'arrowright') {
+        handleKeyPress('ARROWRIGHT');
       } else if (/^[a-z]$/.test(key)) {
         handleLetterInput(key.toUpperCase());
       }

@@ -46,21 +46,21 @@ export const Keyboard: React.FC<KeyboardProps> = ({
     const status = getKeyStatus(key);
     
     return cn(
-      'h-14 font-semibold text-sm transition-all duration-200 rounded-md',
+      'h-14 font-semibold text-sm transition-all duration-200 rounded-lg border-2',
       {
         // Special keys
         'flex-1 min-w-0': key === 'ENTER' || key === 'BACKSPACE',
         'w-10': key !== 'ENTER' && key !== 'BACKSPACE',
         
         // Status colors
-        'bg-green-500 hover:bg-green-600 text-white border-green-500': status === 'correct',
+        'bg-green-600 hover:bg-green-700 text-white border-green-600': status === 'correct',
         'bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500': status === 'present',
-        'bg-gray-500 hover:bg-gray-600 text-white border-gray-500': status === 'absent',
+        'bg-gray-600 hover:bg-gray-700 text-gray-300 border-gray-600 opacity-60': status === 'absent',
         'bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-900 dark:text-white border-gray-300 dark:border-gray-500': status === 'unused',
         
         // Disabled state
-        'opacity-50 cursor-not-allowed': disabled,
-        'hover:scale-105 active:scale-95': !disabled
+        'opacity-30 cursor-not-allowed': disabled,
+        'hover:scale-105 active:scale-95': !disabled && status !== 'absent'
       }
     );
   };
