@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { FIVE_LETTER_WORDS } from '../data/words';
 import { toast } from '@/hooks/use-toast';
@@ -79,9 +78,11 @@ export const useGameLogic = (
       }
       
       // Only update if the new status is better than the current one
-      if (!newStatuses[letter] || 
-          (newStatuses[letter] === 'absent' && bestStatus !== 'absent') ||
-          (newStatuses[letter] === 'present' && bestStatus === 'correct')) {
+      const currentStatus = newStatuses[letter];
+      if (!currentStatus || 
+          (currentStatus === 'absent' && bestStatus !== 'absent') ||
+          (currentStatus === 'present' && bestStatus === 'correct') ||
+          (currentStatus === 'unused' && bestStatus !== 'unused')) {
         newStatuses[letter] = bestStatus;
       }
     }
