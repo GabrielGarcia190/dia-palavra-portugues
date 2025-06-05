@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { BarChart3, HelpCircle, Moon, Sun } from 'lucide-react';
+import { BarChart3, HelpCircle, Moon, Sun, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface HeaderProps {
   onStatsClick: () => void;
   onHelpClick: () => void;
   onToggleDarkMode: () => void;
+  onModeClick: () => void;
   darkMode: boolean;
 }
 
@@ -14,6 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
   onStatsClick,
   onHelpClick,
   onToggleDarkMode,
+  onModeClick,
   darkMode
 }) => {
   return (
@@ -40,6 +42,15 @@ export const Header: React.FC<HeaderProps> = ({
             className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
           >
             {darkMode ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onModeClick}
+            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+          >
+            <Layers className="h-6 w-6" />
           </Button>
           
           <Button

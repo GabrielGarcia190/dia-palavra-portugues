@@ -3,11 +3,11 @@ import { useGameState } from './useGameState';
 import { useGameLogic } from './useGameLogic';
 import { useKeyboardInput } from './useKeyboardInput';
 
-export type { GameStatus, LetterStatus } from './useGameState';
+export type { GameStatus, LetterStatus, GameMode } from './useGameState';
 
 export const useGame = () => {
   const {
-    targetWord,
+    targetWords,
     guesses,
     setGuesses,
     currentGuess,
@@ -23,11 +23,13 @@ export const useGame = () => {
     selectedPosition,
     setSelectedPosition,
     MAX_GUESSES,
-    WORD_LENGTH
+    WORD_LENGTH,
+    gameMode,
+    changeGameMode
   } = useGameState();
 
   const { submitGuess, resetGame } = useGameLogic(
-    targetWord,
+    targetWords,
     guesses,
     setGuesses,
     currentGuess,
@@ -43,14 +45,16 @@ export const useGame = () => {
     selectedPosition,
     setSelectedPosition,
     MAX_GUESSES,
-    WORD_LENGTH
+    WORD_LENGTH,
+    gameMode
   );
 
   const {
     handleKeyPress,
     handleTileClick,
     handleLetterInput,
-    handleBackspaceAtPosition
+    handleBackspaceAtPosition,
+    handleArrowNavigation
   } = useKeyboardInput(
     gameStatus,
     currentGuess,
@@ -68,12 +72,16 @@ export const useGame = () => {
     currentRow,
     letterStatuses,
     selectedPosition,
-    targetWord: targetWord.toUpperCase(),
+    targetWords,
     handleKeyPress,
     handleTileClick,
     handleLetterInput,
     handleBackspaceAtPosition,
     resetGame,
-    stats
+    stats,
+    MAX_GUESSES,
+    WORD_LENGTH,
+    gameMode,
+    changeGameMode
   };
 };

@@ -4,7 +4,7 @@ import { GameTile } from './GameTile';
 
 interface GameRowProps {
   word: string;
-  targetWord: string;
+  targetWords: string[];
   isCurrentRow: boolean;
   isSubmitted: boolean;
   rowIndex: number;
@@ -14,7 +14,7 @@ interface GameRowProps {
 
 export const GameRow: React.FC<GameRowProps> = ({
   word,
-  targetWord,
+  targetWords,
   isCurrentRow,
   isSubmitted,
   rowIndex,
@@ -29,7 +29,7 @@ export const GameRow: React.FC<GameRowProps> = ({
           <GameTile
             key={index}
             letter={letter}
-            targetWord={targetWord}
+            targetWords={targetWords}
             position={index}
             isCurrentRow={isCurrentRow}
             isSubmitted={isSubmitted}

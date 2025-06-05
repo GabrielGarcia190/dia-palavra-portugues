@@ -1,29 +1,32 @@
 
 import React from 'react';
 import { GameRow } from './GameRow';
-import { GameStatus } from '../hooks/useGame';
+import { GameStatus, GameMode } from '../hooks/useGame';
 
 interface GameBoardProps {
   guesses: string[];
   currentGuess: string;
   currentRow: number;
-  targetWord: string;
+  targetWords: string[];
   gameStatus: GameStatus;
   selectedPosition: number;
   onTileClick: (position: number) => void;
+  gameMode: GameMode;
+  MAX_GUESSES: number;
 }
 
-const MAX_GUESSES = 6;
-const WORD_LENGTH = 5; // Corrigido para 5 letras
+const WORD_LENGTH = 5;
 
 export const GameBoard: React.FC<GameBoardProps> = ({
   guesses,
   currentGuess,
   currentRow,
-  targetWord,
+  targetWords,
   gameStatus,
   selectedPosition,
-  onTileClick
+  onTileClick,
+  gameMode,
+  MAX_GUESSES
 }) => {
   const rows = Array.from({ length: MAX_GUESSES }, (_, index) => {
     if (index < guesses.length) {
@@ -38,20 +41,36 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     }
   });
 
+  const renderGameModeInfo = () => {
+    switch (gameMode) {
+      case 'normal':
+        return <div className="text-center mb-2 text-gray-600 dark:text-gray-300">Modo Normal</div>;
+      case 'double':
+        return <div className="text-center mb-2 text-gray-600 dark:text-gray-300">Modo Duplo (2 palavras)</div>;
+      case 'quadruple':
+        return <div className="text-center mb-2 text-gray-600 dark:text-gray-300">Modo Quádruplo (4 palavras)</div>;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="grid gap-2 mb-8 max-w-sm mx-auto">
-      {rows.map((row, index) => (
-        <GameRow
-          key={index}
-          word={row}
-          targetWord={targetWord}
-          isCurrentRow={index === currentRow && gameStatus === 'playing'}
-          isSubmitted={index < guesses.length}
-          rowIndex={index}
-          selectedPosition={selectedPosition}
-          onTileClick={onTileClick}
-        />
-      ))}
+    <div className="mb-8 max-w-sm mx-auto">
+      {renderGameModeInfo()}
+      <div className="grid gap-2">
+        {rows.map((row, index) => (
+          <GameRow
+            key={index}
+            word={row}
+            targetWords={targetWords}
+            isCurrentRow={index === currentRow && gameStatus === 'playing'}
+            isSubmitted={index < guesses.length}
+            rowIndex={index}
+            selectedPosition={selectedPosition}
+            onTileClick={onTileClick}
+          />
+        ))}
+      </div>
     </div>
   );
 };

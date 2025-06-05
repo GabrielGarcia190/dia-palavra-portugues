@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface GameTileProps {
   letter: string;
-  targetWord: string;
+  targetWords: string[];
   position: number;
   isCurrentRow: boolean;
   isSubmitted: boolean;
@@ -16,7 +16,7 @@ interface GameTileProps {
 
 export const GameTile: React.FC<GameTileProps> = ({
   letter,
-  targetWord,
+  targetWords,
   position,
   isCurrentRow,
   isSubmitted,
@@ -31,12 +31,18 @@ export const GameTile: React.FC<GameTileProps> = ({
     const trimmedLetter = letter.trim();
     if (!trimmedLetter) return 'empty';
     
-    if (trimmedLetter === targetWord[position]) {
-      return 'correct';
+    // Check if the letter is in the correct position in any of the target words
+    for (const targetWord of targetWords) {
+      if (trimmedLetter === targetWord[position]) {
+        return 'correct';
+      }
     }
     
-    if (targetWord.includes(trimmedLetter)) {
-      return 'present';
+    // Check if the letter exists in any of the target words
+    for (const targetWord of targetWords) {
+      if (targetWord.includes(trimmedLetter)) {
+        return 'present';
+      }
     }
     
     return 'absent';
@@ -48,26 +54,23 @@ export const GameTile: React.FC<GameTileProps> = ({
   return (
     <div
       className={cn(
-        'w-14 h-14 border-2 rounded-lg flex items-center justify-center text-2xl font-bold transition-all duration-300 cursor-pointer',
+        'w-14 h-14 border-2 rounded-md flex items-center justify-center text-2xl font-bold transition-all duration-300 cursor-pointer',
         {
           // Empty state
-          'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700': !hasLetter && !isSubmitted,
+          'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800': !hasLetter && !isSubmitted,
           
           // Current row with letter
-          'border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 scale-105': hasLetter && isCurrentRow && !isSelected,
+          'border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-800 scale-105': hasLetter && isCurrentRow && !isSelected,
           
           // Selected state
           'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-400 scale-110': isSelected,
           
-          // Submitted states (removed animate-pulse from correct)
+          // Submitted states
           'border-green-500 bg-green-500 text-white': status === 'correct',
           'border-yellow-500 bg-yellow-500 text-white': status === 'present',
           'border-gray-500 bg-gray-500 text-white': status === 'absent',
         }
       )}
-      style={{
-        animationDelay: isSubmitted ? `${tileIndex * 100}ms` : '0ms'
-      }}
       onClick={onClick}
     >
       <span className="text-gray-900 dark:text-white">

@@ -5,8 +5,9 @@ import { Keyboard } from '../components/Keyboard';
 import { Header } from '../components/Header';
 import { StatsModal } from '../components/StatsModal';
 import { HelpModal } from '../components/HelpModal';
-import { useGame } from '../hooks/useGame';
+import { useGame, GameMode } from '../hooks/useGame';
 import { Toaster } from "@/components/ui/toaster";
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const {
@@ -16,17 +17,21 @@ const Index = () => {
     currentRow,
     letterStatuses,
     selectedPosition,
-    targetWord,
+    targetWords,
     handleKeyPress,
     handleTileClick,
     handleLetterInput,
     handleBackspaceAtPosition,
     resetGame,
-    stats
+    stats,
+    MAX_GUESSES,
+    gameMode,
+    changeGameMode
   } = useGame();
 
   const [showStats, setShowStats] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showModeSelector, setShowModeSelector] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : false;
@@ -47,7 +52,7 @@ const Index = () => {
       
       if (key === 'enter') {
         handleKeyPress('ENTER');
-      } else if (key === 'backspace') {
+      } else if (key === 'backspace' || key === 'delete') {
         handleBackspaceAtPosition();
       } else if (key === 'arrowleft') {
         handleKeyPress('ARROWLEFT');
@@ -72,27 +77,66 @@ const Index = () => {
     }
   }, [gameStatus]);
 
+  const handleModeChange = (mode: GameMode) => {
+    changeGameMode(mode);
+    setShowModeSelector(false);
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
-      darkMode ? 'dark bg-gray-800' : 'bg-gray-50'
+      darkMode ? 'dark bg-gray-900' : 'bg-gray-50'
     }`}>
       <div className="max-w-lg mx-auto px-4">
         <Header 
           onStatsClick={() => setShowStats(true)}
           onHelpClick={() => setShowHelp(true)}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
+          onModeClick={() => setShowModeSelector(true)}
           darkMode={darkMode}
         />
+        
+        {showModeSelector && (
+          <div className="mb-6 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <h3 className="text-lg font-medium mb-3 text-center text-gray-900 dark:text-white">
+              Escolha um modo de jogo
+            </h3>
+            <div className="flex flex-col gap-3">
+              <Button 
+                variant={gameMode === 'normal' ? 'default' : 'outline'} 
+                onClick={() => handleModeChange('normal')}
+                className="w-full"
+              >
+                Normal (1 palavra - 6 tentativas)
+              </Button>
+              <Button 
+                variant={gameMode === 'double' ? 'default' : 'outline'} 
+                onClick={() => handleModeChange('double')}
+                className="w-full"
+              >
+                Duplo (2 palavras - 9 tentativas)
+              </Button>
+              <Button 
+                variant={gameMode === 'quadruple' ? 'default' : 'outline'} 
+                onClick={() => handleModeChange('quadruple')}
+                className="w-full"
+              >
+                Quádruplo (4 palavras - 12 tentativas)
+              </Button>
+            </div>
+          </div>
+        )}
         
         <main className="pb-20">
           <GameBoard 
             guesses={guesses}
             currentGuess={currentGuess}
             currentRow={currentRow}
-            targetWord={targetWord}
+            targetWords={targetWords}
             gameStatus={gameStatus}
             selectedPosition={selectedPosition}
             onTileClick={handleTileClick}
+            gameMode={gameMode}
+            MAX_GUESSES={MAX_GUESSES}
           />
           
           <Keyboard 
@@ -110,7 +154,7 @@ const Index = () => {
           stats={stats}
           gameStatus={gameStatus}
           guesses={guesses}
-          targetWord={targetWord}
+          targetWord={targetWords.join(', ')}
           onPlayAgain={resetGame}
         />
 

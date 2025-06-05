@@ -26,9 +26,8 @@ export const useKeyboardInput = (
     setCurrentGuess(updatedGuess);
     
     // Move to next empty position or next position if not at the end
-    let nextPosition = selectedPosition + 1;
-    if (nextPosition < WORD_LENGTH) {
-      setSelectedPosition(nextPosition);
+    if (selectedPosition < WORD_LENGTH - 1) {
+      setSelectedPosition(selectedPosition + 1);
     }
   }, [gameStatus, currentGuess, selectedPosition, WORD_LENGTH, setCurrentGuess, setSelectedPosition]);
 
@@ -40,14 +39,19 @@ export const useKeyboardInput = (
       i < currentGuess.length ? currentGuess[i] : ' '
     );
     
-    // Remove letter at selected position only - don't shift other letters
-    newGuess[selectedPosition] = ' ';
+    // Check if current position has a letter
+    if (newGuess[selectedPosition] !== ' ') {
+      // Delete character at the current position
+      newGuess[selectedPosition] = ' ';
+      setCurrentGuess(newGuess.join(''));
+    } else if (selectedPosition > 0) {
+      // Move backward and delete character if current position is empty
+      setSelectedPosition(selectedPosition - 1);
+      newGuess[selectedPosition - 1] = ' ';
+      setCurrentGuess(newGuess.join(''));
+    }
     
-    const updatedGuess = newGuess.join('');
-    setCurrentGuess(updatedGuess);
-    
-    // Don't move position when deleting
-  }, [gameStatus, currentGuess, selectedPosition, WORD_LENGTH, setCurrentGuess]);
+  }, [gameStatus, currentGuess, selectedPosition, WORD_LENGTH, setCurrentGuess, setSelectedPosition]);
 
   const handleArrowNavigation = useCallback((direction: 'left' | 'right') => {
     if (gameStatus !== 'playing') return;

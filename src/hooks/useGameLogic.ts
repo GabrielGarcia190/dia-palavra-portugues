@@ -1,8 +1,8 @@
 
 import { useCallback } from 'react';
-import { PORTUGUESE_WORDS } from '../data/words';
+import { FIVE_LETTER_WORDS } from '../data/words';
 import { toast } from '@/hooks/use-toast';
-import { GameStatus, LetterStatus } from './useGameState';
+import { GameStatus, LetterStatus, GameMode } from './useGameState';
 
 interface GameStats {
   gamesPlayed: number;
@@ -13,7 +13,7 @@ interface GameStats {
 }
 
 export const useGameLogic = (
-  targetWord: string,
+  targetWords: string[],
   guesses: string[],
   setGuesses: (guesses: string[]) => void,
   currentGuess: string,
@@ -29,17 +29,18 @@ export const useGameLogic = (
   selectedPosition: number,
   setSelectedPosition: (position: number) => void,
   MAX_GUESSES: number,
-  WORD_LENGTH: number
+  WORD_LENGTH: number,
+  gameMode: GameMode
 ) => {
   const isValidWord = (word: string): boolean => {
     const cleanWord = word.replace(/\s/g, '').toLowerCase();
-    console.log('Checking word:', cleanWord);
-    const isValid = PORTUGUESE_WORDS.includes(cleanWord);
-    console.log('Word is valid:', isValid);
-    return isValid;
+    if (cleanWord.length !== WORD_LENGTH) return false;
+    return FIVE_LETTER_WORDS.includes(cleanWord);
   };
 
-  const getLetterStatus = (letter: string, position: number, word: string): LetterStatus => {
+  const getLetterStatus = (letter: string, position: number, targetWord: string): LetterStatus => {
+    if (!letter || letter === ' ') return 'unused';
+    
     const targetLetter = targetWord[position];
     
     if (letter === targetLetter) {
@@ -53,19 +54,35 @@ export const useGameLogic = (
     return 'absent';
   };
 
-  const updateLetterStatuses = (word: string) => {
+  const updateLetterStatusesForAllWords = (word: string) => {
     const newStatuses = { ...letterStatuses };
     
+    // Check each letter against each target word and take the best status
     for (let i = 0; i < word.length; i++) {
       const letter = word[i];
       if (letter === ' ') continue; // Skip spaces
       
-      const status = getLetterStatus(letter, i, word);
+      let bestStatus: LetterStatus = 'absent';
       
+      for (const targetWord of targetWords) {
+        const status = getLetterStatus(letter, i, targetWord);
+        
+        // If a letter is correct in any word, mark it as correct
+        if (status === 'correct') {
+          bestStatus = 'correct';
+          break;
+        }
+        // If a letter is present but not already marked as correct
+        else if (status === 'present' && bestStatus !== 'correct') {
+          bestStatus = 'present';
+        }
+      }
+      
+      // Only update if the new status is better than the current one
       if (!newStatuses[letter] || 
-          (newStatuses[letter] === 'absent' && status !== 'absent') ||
-          (newStatuses[letter] === 'present' && status === 'correct')) {
-        newStatuses[letter] = status;
+          (newStatuses[letter] === 'absent' && bestStatus !== 'absent') ||
+          (newStatuses[letter] === 'present' && bestStatus === 'correct')) {
+        newStatuses[letter] = bestStatus;
       }
     }
     
@@ -80,7 +97,9 @@ export const useGameLogic = (
       newStats.gamesWon++;
       newStats.currentStreak++;
       newStats.maxStreak = Math.max(newStats.maxStreak, newStats.currentStreak);
-      newStats.guessDistribution[guessCount - 1]++;
+      if (guessCount <= 6) { // Only update distribution for guesses within original range
+        newStats.guessDistribution[guessCount - 1]++;
+      }
     } else {
       newStats.currentStreak = 0;
     }
@@ -89,9 +108,14 @@ export const useGameLogic = (
     localStorage.setItem('wordleStats', JSON.stringify(newStats));
   };
 
+  const checkGuessAgainstWords = (guess: string): boolean => {
+    // Check if the guess matches any of the target words
+    const cleanGuess = guess.replace(/\s/g, '').toUpperCase();
+    return targetWords.some(word => cleanGuess === word);
+  };
+
   const submitGuess = useCallback(() => {
     const cleanGuess = currentGuess.replace(/\s/g, '');
-    console.log('Submitting guess:', cleanGuess);
     
     if (cleanGuess.length !== WORD_LENGTH) {
       toast({
@@ -113,9 +137,9 @@ export const useGameLogic = (
 
     const newGuesses = [...guesses, currentGuess];
     setGuesses(newGuesses);
-    updateLetterStatuses(currentGuess);
+    updateLetterStatusesForAllWords(currentGuess);
 
-    if (cleanGuess.toUpperCase() === targetWord.toUpperCase()) {
+    if (checkGuessAgainstWords(currentGuess)) {
       setGameStatus('won');
       updateStats(true, newGuesses.length);
       toast({
@@ -127,7 +151,7 @@ export const useGameLogic = (
       updateStats(false, newGuesses.length);
       toast({
         title: "Fim de jogo! 😔",
-        description: `A palavra era: ${targetWord.toUpperCase()}`,
+        description: `As palavras eram: ${targetWords.join(', ')}`,
         variant: "destructive"
       });
     }
@@ -135,7 +159,7 @@ export const useGameLogic = (
     setCurrentGuess(' '.repeat(WORD_LENGTH));
     setCurrentRow(currentRow + 1);
     setSelectedPosition(0);
-  }, [currentGuess, guesses, targetWord, currentRow, letterStatuses, stats, WORD_LENGTH, MAX_GUESSES]);
+  }, [currentGuess, guesses, targetWords, currentRow, letterStatuses, stats, WORD_LENGTH, MAX_GUESSES]);
 
   const resetGame = () => {
     setGuesses([]);
@@ -152,7 +176,7 @@ export const useGameLogic = (
     resetGame,
     isValidWord,
     getLetterStatus,
-    updateLetterStatuses,
+    updateLetterStatusesForAllWords,
     updateStats
   };
 };
