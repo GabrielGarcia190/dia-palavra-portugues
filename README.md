@@ -1,6 +1,6 @@
-# Welcome to your Lovable project
+# Projeto de teste usando a IA Lovable
 
-## Project info
+## Informações do projeto
 
 **URL**: https://lovable.dev/projects/afe8a6f7-4247-4ce3-b0dc-c96b6c715d3d
 
