@@ -12,3 +12,5 @@ Este projeto foi construído com:
 
 ### Informações adicionais
 Cerca de 90% do código foi gerado e commitado pela IA, sendo necessário apenas alguns ajustes nos arquivos.
+
+Caso queria testar a aplicação bastar acesso o link: ------disponibilizar link da vercel-----------
