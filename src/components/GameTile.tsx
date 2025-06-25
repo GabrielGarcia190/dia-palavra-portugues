@@ -31,16 +31,20 @@ export const GameTile: React.FC<GameTileProps> = ({
     const trimmedLetter = letter.trim();
     if (!trimmedLetter) return 'empty';
     
+    // Validar se targetWords existe e tem elementos
+    if (!targetWords || targetWords.length === 0) return 'empty';
+    
     // Check if the letter is in the correct position in any of the target words
     for (const targetWord of targetWords) {
-      if (trimmedLetter === targetWord[position]) {
+      // Validar se a palavra existe e tem o comprimento necessário
+      if (targetWord && targetWord.length > position && trimmedLetter === targetWord[position]) {
         return 'correct';
       }
     }
     
     // Check if the letter exists in any of the target words
     for (const targetWord of targetWords) {
-      if (targetWord.includes(trimmedLetter)) {
+      if (targetWord && targetWord.includes(trimmedLetter)) {
         return 'present';
       }
     }

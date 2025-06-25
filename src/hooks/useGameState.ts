@@ -1,4 +1,6 @@
+
 import { WordLoader } from '@/data/words';
+import { DailyWordManager } from '@/data/dailyWords';
 import { useState, useEffect } from 'react';
 
 export type GameStatus = 'playing' | 'won' | 'lost';
@@ -38,29 +40,30 @@ const getInitialStats = (): GameStats => {
   };
 };
 
-// Generate target word(s) based on game mode
+// Generate target word(s) based on game mode using database
 const getTargetWords = async (mode: GameMode): Promise<string[]> => {
   const today = new Date();
   const dateString = today.toDateString();
-  const saved = localStorage.getItem('todaysWordData');
-  
-  if (saved) {
-    const data = JSON.parse(saved);
-    if (data.date === dateString && data.mode === mode) {
-      return data.words;
-    }
-  }
-  
-  // Generate new word(s) for today using WordLoader
-  const wordsNeeded = mode === 'normal' ? 1 : mode === 'double' ? 2 : 4;
-  const words: string[] = [];
   
   try {
-    // Make sure all words are unique
+    // Limpar palavras antigas
+    await DailyWordManager.clearOldWords();
+    
+    // Tentar buscar palavras do banco
+    const savedWords = await DailyWordManager.getDailyWords(dateString, mode);
+    if (savedWords && savedWords.length > 0) {
+      return savedWords;
+    }
+    
+    // Gerar novas palavras se não existirem no banco
+    const wordsNeeded = mode === 'normal' ? 1 : mode === 'double' ? 2 : 4;
+    const words: string[] = [];
+    
+    // Gerar palavras únicas
     for (let i = 0; i < wordsNeeded; i++) {
       let newWord;
       let attempts = 0;
-      const maxAttempts = 50; // Evita loop infinito
+      const maxAttempts = 50;
       
       do {
         newWord = await WordLoader.getRandomWord();
@@ -68,7 +71,6 @@ const getTargetWords = async (mode: GameMode): Promise<string[]> => {
         attempts++;
         
         if (attempts > maxAttempts) {
-          // Se não conseguir palavra única, usa uma palavra com sufixo
           newWord = newWord + '_' + i;
           break;
         }
@@ -77,17 +79,15 @@ const getTargetWords = async (mode: GameMode): Promise<string[]> => {
       words.push(newWord);
     }
     
-    localStorage.setItem('todaysWordData', JSON.stringify({
-      date: dateString,
-      mode: mode,
-      words: words
-    }));
+    // Salvar no banco
+    await DailyWordManager.saveDailyWords(dateString, mode, words);
     
     return words;
   } catch (error) {
     console.error('Erro ao carregar palavras:', error);
-    // Fallback: usar palavras padrão em caso de erro
+    // Fallback: usar palavras padrão
     const fallbackWords = ['TERMO', 'JOGO', 'CASA', 'VIDA'];
+    const wordsNeeded = mode === 'normal' ? 1 : mode === 'double' ? 2 : 4;
     return fallbackWords.slice(0, wordsNeeded);
   }
 };
@@ -114,7 +114,7 @@ export const useGameState = () => {
         setTargetWords(words);
       } catch (error) {
         console.error('Erro ao inicializar palavras:', error);
-        setTargetWords(['TERMO']); // Palavra padrão de fallback
+        setTargetWords(['TERMO']);
       } finally {
         setIsLoading(false);
       }
@@ -133,7 +133,6 @@ export const useGameState = () => {
       if (gameData.date === today) {
         setGameMode(gameData.gameMode || 'normal');
         
-        // Se temos palavras salvas, use-as, senão carregue novas
         if (gameData.targetWords && gameData.targetWords.length > 0) {
           setTargetWords(gameData.targetWords);
         }
@@ -150,7 +149,7 @@ export const useGameState = () => {
 
   // Save game state
   useEffect(() => {
-    if (targetWords.length > 0) { // Só salva se temos palavras carregadas
+    if (targetWords.length > 0) {
       const today = new Date().toDateString();
       const gameData = {
         date: today,
@@ -177,7 +176,6 @@ export const useGameState = () => {
         setTargetWords(newWords);
       } catch (error) {
         console.error('Erro ao carregar novas palavras:', error);
-        // Usar palavras padrão baseado no modo
         const fallbackWords = ['TERMO', 'JOGO', 'CASA', 'VIDA'];
         const wordsNeeded = newMode === 'normal' ? 1 : newMode === 'double' ? 2 : 4;
         setTargetWords(fallbackWords.slice(0, wordsNeeded));
@@ -216,6 +214,6 @@ export const useGameState = () => {
     WORD_LENGTH,
     gameMode,
     changeGameMode,
-    isLoading // Novo estado para indicar carregamento
+    isLoading
   };
 };
