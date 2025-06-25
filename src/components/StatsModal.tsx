@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Share2, Trophy } from 'lucide-react';
 import { GameStatus } from '../hooks/useGame';
 import { toast } from '@/hooks/use-toast';
+import { DailyWordManager } from '../data/dailyWords';
 
 interface GameStats {
   gamesPlayed: number;
@@ -33,6 +34,21 @@ export const StatsModal: React.FC<StatsModalProps> = ({
   targetWord,
   onPlayAgain
 }) => {
+  const [nextWordTime, setNextWordTime] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      const updateTimer = () => {
+        setNextWordTime(DailyWordManager.getNextWordTime());
+      };
+      
+      updateTimer(); // Atualizar imediatamente
+      const interval = setInterval(updateTimer, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isOpen]);
+
   const winPercentage = stats.gamesPlayed > 0 
     ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) 
     : 0;
@@ -205,12 +221,8 @@ export const StatsModal: React.FC<StatsModalProps> = ({
           {/* Next Game Timer */}
           <div className="text-center text-sm text-gray-600 dark:text-gray-400">
             <p>Próxima palavra em:</p>
-            <p className="font-mono text-lg">
-              {new Date(new Date().setHours(24, 0, 0, 0)).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-              })}
+            <p className="font-mono text-lg text-gray-900 dark:text-white">
+              {nextWordTime}
             </p>
           </div>
         </div>

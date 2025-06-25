@@ -72,6 +72,7 @@ const getTargetWords = async (mode: GameMode): Promise<string[]> => {
     // Tentar buscar palavras do banco
     const savedWords = await DailyWordManager.getDailyWords(dateString, mode);
     if (savedWords && savedWords.length > 0) {
+      console.log(`Usando palavras salvas para ${mode}:`, savedWords);
       return savedWords;
     }
     
@@ -98,6 +99,8 @@ const getTargetWords = async (mode: GameMode): Promise<string[]> => {
       
       words.push(newWord);
     }
+    
+    console.log(`Gerando novas palavras para ${mode}:`, words);
     
     // Salvar no banco
     await DailyWordManager.saveDailyWords(dateString, mode, words);

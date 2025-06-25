@@ -48,8 +48,10 @@ export class DailyWordManager {
         request.onsuccess = () => {
           const result = request.result as DailyWordRecord;
           if (result) {
+            console.log(`Palavras carregadas do banco para ${mode} em ${date}:`, JSON.parse(result.words));
             resolve(JSON.parse(result.words));
           } else {
+            console.log(`Nenhuma palavra encontrada no banco para ${mode} em ${date}`);
             resolve(null);
           }
         };
@@ -68,18 +70,35 @@ export class DailyWordManager {
       const transaction = db.transaction(['daily_words'], 'readwrite');
       const store = transaction.objectStore('daily_words');
       
-      const record: Omit<DailyWordRecord, 'id'> = {
-        date,
-        mode,
-        word: words[0], // Manter compatibilidade
-        words: JSON.stringify(words)
-      };
-
+      // Verificar se já existe uma entrada para esta data e modo
+      const index = store.index('date_mode');
+      const existingRequest = index.get([date, mode]);
+      
       return new Promise((resolve, reject) => {
-        const request = store.add(record);
+        existingRequest.onsuccess = () => {
+          if (existingRequest.result) {
+            console.log(`Palavras já existem no banco para ${mode} em ${date}:`, words);
+            resolve();
+            return;
+          }
+          
+          const record: Omit<DailyWordRecord, 'id'> = {
+            date,
+            mode,
+            word: words[0], // Manter compatibilidade
+            words: JSON.stringify(words)
+          };
+
+          const addRequest = store.add(record);
+          
+          addRequest.onsuccess = () => {
+            console.log(`Palavras salvas no banco para ${mode} em ${date}:`, words);
+            resolve();
+          };
+          addRequest.onerror = () => reject(addRequest.error);
+        };
         
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
+        existingRequest.onerror = () => reject(existingRequest.error);
       });
     } catch (error) {
       console.error('Erro ao salvar palavras do dia:', error);
@@ -102,6 +121,7 @@ export class DailyWordManager {
           if (cursor) {
             const record = cursor.value as DailyWordRecord;
             if (record.date !== today) {
+              console.log(`Removendo palavra antiga: ${record.date} - ${record.mode}`);
               cursor.delete();
             }
             cursor.continue();
@@ -115,5 +135,19 @@ export class DailyWordManager {
     } catch (error) {
       console.error('Erro ao limpar palavras antigas:', error);
     }
+  }
+
+  public static getNextWordTime(): string {
+    const now = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(now.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    const timeDiff = tomorrow.getTime() - now.getTime();
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
 }
