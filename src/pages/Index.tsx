@@ -119,7 +119,7 @@ const Index = () => {
                 onClick={() => handleModeChange('quadruple')}
                 className="w-full"
               >
-                Quádruplo (4 palavras - 12 tentativas)
+                Quádruplo (4 palavras - 10 tentativas)
               </Button>
             </div>
           </div>

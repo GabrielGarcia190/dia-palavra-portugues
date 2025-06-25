@@ -31,7 +31,7 @@ const getMaxGuesses = (mode: GameMode): number => {
   switch (mode) {
     case 'normal': return 6;
     case 'double': return 9;
-    case 'quadruple': return 12;
+    case 'quadruple': return 10;
     default: return 6;
   }
 };

@@ -93,9 +93,6 @@ export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
         }`}>
           {Array.from({ length: gridCount }, (_, gridIndex) => (
             <div key={gridIndex} className="flex flex-col items-center">
-              <div className="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Palavra {gridIndex + 1}
-              </div>
               <div className="space-y-2">
                 {rows.map((row, rowIndex) => (
                   <GameRow
