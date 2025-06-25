@@ -85,30 +85,34 @@ export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
     const gridCount = gameMode === 'double' ? 2 : 4;
     
     return (
-      <div className={`flex flex-wrap justify-center gap-6 max-w-6xl mx-auto ${
-        gameMode === 'quadruple' ? 'md:grid md:grid-cols-2 lg:grid-cols-4' : 'md:flex md:flex-row'
-      }`}>
-        {Array.from({ length: gridCount }, (_, gridIndex) => (
-          <div key={gridIndex} className="flex-1 min-w-[280px] max-w-sm">
-            <div className="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Palavra {gridIndex + 1}
+      <div className="w-full max-w-none mx-auto px-4">
+        <div className={`grid gap-8 ${
+          gameMode === 'double' 
+            ? 'grid-cols-1 sm:grid-cols-2' 
+            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+        }`}>
+          {Array.from({ length: gridCount }, (_, gridIndex) => (
+            <div key={gridIndex} className="flex flex-col items-center">
+              <div className="text-center text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Palavra {gridIndex + 1}
+              </div>
+              <div className="space-y-2">
+                {rows.map((row, rowIndex) => (
+                  <GameRow
+                    key={`${gridIndex}-${rowIndex}`}
+                    word={row}
+                    targetWords={[targetWords[gridIndex]]}
+                    isCurrentRow={rowIndex === currentRow && gameStatus === 'playing'}
+                    isSubmitted={rowIndex < guesses.length}
+                    rowIndex={rowIndex}
+                    selectedPosition={gridIndex === 0 ? selectedPosition : undefined}
+                    onTileClick={gridIndex === 0 ? onTileClick : undefined}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="space-y-2">
-              {rows.map((row, rowIndex) => (
-                <GameRow
-                  key={`${gridIndex}-${rowIndex}`}
-                  word={row}
-                  targetWords={[targetWords[gridIndex]]}
-                  isCurrentRow={rowIndex === currentRow && gameStatus === 'playing'}
-                  isSubmitted={rowIndex < guesses.length}
-                  rowIndex={rowIndex}
-                  selectedPosition={gridIndex === 0 ? selectedPosition : undefined}
-                  onTileClick={gridIndex === 0 ? onTileClick : undefined}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   };

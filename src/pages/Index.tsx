@@ -85,7 +85,7 @@ const Index = () => {
     <div className={`min-h-screen transition-colors duration-300 ${
       darkMode ? 'dark bg-gray-900' : 'bg-gray-50'
     }`}>
-      <div className="max-w-lg mx-auto px-4">
+      <div className={`${gameMode === 'normal' ? 'max-w-lg' : 'max-w-full'} mx-auto px-4`}>
         <Header 
           onStatsClick={() => setShowStats(true)}
           onHelpClick={() => setShowHelp(true)}
@@ -95,7 +95,7 @@ const Index = () => {
         />
         
         {showModeSelector && (
-          <div className="mb-6 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+          <div className="mb-6 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-md max-w-lg mx-auto">
             <h3 className="text-lg font-medium mb-3 text-center text-gray-900 dark:text-white">
               Escolha um modo de jogo
             </h3>
@@ -138,13 +138,15 @@ const Index = () => {
             MAX_GUESSES={MAX_GUESSES}
           />
           
-          <Keyboard 
-            onKeyPress={handleKeyPress}
-            onLetterInput={handleLetterInput}
-            onBackspaceAtPosition={handleBackspaceAtPosition}
-            letterStatuses={letterStatuses}
-            disabled={gameStatus !== 'playing'}
-          />
+          <div className={`${gameMode === 'normal' ? '' : 'max-w-lg mx-auto'}`}>
+            <Keyboard 
+              onKeyPress={handleKeyPress}
+              onLetterInput={handleLetterInput}
+              onBackspaceAtPosition={handleBackspaceAtPosition}
+              letterStatuses={letterStatuses}
+              disabled={gameStatus !== 'playing'}
+            />
+          </div>
         </main>
 
         <StatsModal 
