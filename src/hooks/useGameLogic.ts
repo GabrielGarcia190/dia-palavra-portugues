@@ -1,8 +1,7 @@
-
 import { useCallback } from 'react';
-import { FIVE_LETTER_WORDS } from '../data/words';
 import { toast } from '@/hooks/use-toast';
 import { GameStatus, LetterStatus, GameMode } from './useGameState';
+import { WordLoader } from '@/data/words';
 
 interface GameStats {
   gamesPlayed: number;
@@ -32,92 +31,97 @@ export const useGameLogic = (
   WORD_LENGTH: number,
   gameMode: GameMode
 ) => {
-  const isValidWord = (word: string): boolean => {
+  const isValidWord = async (word: string): Promise<boolean> => {
     const cleanWord = word.replace(/\s/g, '').toLowerCase();
     if (cleanWord.length !== WORD_LENGTH) return false;
-    return FIVE_LETTER_WORDS.includes(cleanWord);
-  };
 
+    try {
+      const response = await fetch(WordLoader.FILE_PATH);
+      const words = (await response.text())
+        .split('\n')
+        .map(w => w.trim().toLowerCase());
+
+      return words.includes(cleanWord);
+    } catch (error) {
+      console.error('Erro ao verificar palavra:', error);
+      return false;
+    }
+  };
   const getLetterStatus = (letter: string, position: number, targetWord: string): LetterStatus => {
     if (!letter || letter === ' ') return 'unused';
-    
+
     const targetLetter = targetWord[position];
-    
+
     if (letter === targetLetter) {
       return 'correct';
     }
-    
+
     if (targetWord.includes(letter)) {
       return 'present';
     }
-    
+
     return 'absent';
   };
 
   const updateLetterStatusesForAllWords = (word: string) => {
     const newStatuses = { ...letterStatuses };
-    
-    // Check each letter against each target word and take the best status
+
     for (let i = 0; i < word.length; i++) {
       const letter = word[i];
-      if (letter === ' ') continue; // Skip spaces
-      
+      if (letter === ' ') continue;
+
       let bestStatus: LetterStatus = 'absent';
-      
+
       for (const targetWord of targetWords) {
         const status = getLetterStatus(letter, i, targetWord);
-        
-        // If a letter is correct in any word, mark it as correct
+
         if (status === 'correct') {
           bestStatus = 'correct';
           break;
         }
-        // If a letter is present but not already marked as correct
         else if (status === 'present' && bestStatus === 'absent') {
           bestStatus = 'present';
         }
       }
-      
-      // Only update if the new status is better than the current one
+
       const currentStatus = newStatuses[letter];
       if (!currentStatus || currentStatus === 'unused' ||
-          (currentStatus === 'absent' && (bestStatus === 'present' || bestStatus === 'correct')) ||
-          (currentStatus === 'present' && bestStatus === 'correct')) {
+        (currentStatus === 'absent' && (bestStatus === 'present' || bestStatus === 'correct')) ||
+        (currentStatus === 'present' && bestStatus === 'correct')) {
         newStatuses[letter] = bestStatus;
       }
     }
-    
+
     setLetterStatuses(newStatuses);
   };
 
   const updateStats = (won: boolean, guessCount: number) => {
     const newStats = { ...stats };
     newStats.gamesPlayed++;
-    
+
     if (won) {
       newStats.gamesWon++;
       newStats.currentStreak++;
       newStats.maxStreak = Math.max(newStats.maxStreak, newStats.currentStreak);
-      if (guessCount <= 6) { // Only update distribution for guesses within original range
+      if (guessCount <= 6) {
         newStats.guessDistribution[guessCount - 1]++;
       }
     } else {
       newStats.currentStreak = 0;
     }
-    
+
     setStats(newStats);
     localStorage.setItem('wordleStats', JSON.stringify(newStats));
   };
 
   const checkGuessAgainstWords = (guess: string): boolean => {
-    // Check if the guess matches any of the target words
     const cleanGuess = guess.replace(/\s/g, '').toUpperCase();
     return targetWords.some(word => cleanGuess === word);
   };
 
-  const submitGuess = useCallback(() => {
+  const submitGuess = useCallback(async () => {
     const cleanGuess = currentGuess.replace(/\s/g, '');
-    
+
     if (cleanGuess.length !== WORD_LENGTH) {
       toast({
         title: "Palavra incompleta",
@@ -127,7 +131,8 @@ export const useGameLogic = (
       return;
     }
 
-    if (!isValidWord(cleanGuess)) {
+    const valid = await isValidWord(cleanGuess);
+    if (!valid) {
       toast({
         title: "Palavra inválida",
         description: "Esta palavra não está na nossa lista",

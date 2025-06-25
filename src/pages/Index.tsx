@@ -67,7 +67,6 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyboard);
   }, [handleKeyPress, handleLetterInput, handleBackspaceAtPosition]);
 
-  // Show stats when game ends
   useEffect(() => {
     if (gameStatus !== 'playing') {
       const timer = setTimeout(() => {

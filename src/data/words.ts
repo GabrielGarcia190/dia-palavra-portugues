@@ -1,148 +1,27 @@
 
-export const FIVE_LETTER_WORDS = [
-  // Common 5-letter Portuguese words
-  'abaco', 'abada', 'abade', 'abafa', 'abalo', 'abana', 'abano', 'abara', 'abate',
-  'abati', 'abava', 'abaya', 'abdal', 'abdam', 'abdom', 'abeai', 'abear', 'abeca',
-  'abece', 'abela', 'abeme', 'abemo', 'abera', 'abere', 'abero', 'abeta', 'abeto',
-  'abiar', 'abica', 'abida', 'abide', 'abiga', 'abigo', 'abila', 'abilo', 'abina',
-  'abine', 'abino', 'abira', 'abire', 'abiro', 'abita', 'abite', 'abito', 'abiva',
-  'abive', 'abivo', 'aboba', 'abode', 'aboga', 'abogo', 'abola', 'abole', 'abolo',
-  'aboma', 'abome', 'abomo', 'abona', 'abone', 'abono', 'abora', 'abore', 'aboro',
-  'abota', 'abote', 'aboto', 'above', 'abram', 'abran', 'abras', 'abrei', 'abrem',
-  'abres', 'abreu', 'abria', 'abrid', 'abril', 'abrim', 'abrin', 'abrio', 'abrir',
-  'abris', 'abriu', 'abrog', 'abroz', 'absem', 'absis', 'absom', 'abste', 'absus',
-  
-  // More common words
-  'acaba', 'acabar', 'acaro', 'acaso', 'aceita', 'aceno', 'acesa', 'acesso', 'aceto',
-  'achar', 'achego', 'acide', 'acima', 'acionar', 'aclam', 'acordo', 'acoso', 'acoto',
-  'acredit', 'acrue', 'activ', 'acuas', 'acucar', 'acude', 'acuen', 'acusa', 'adaptar',
-  'adega', 'adento', 'adepto', 'adesao', 'adeus', 'adiar', 'adicao', 'admin', 'adorar',
-  'adotar', 'adubar', 'adulto', 'advento', 'aereo', 'afastar', 'aferir', 'afeto',
-  'afinar', 'afirm', 'afivel', 'afoga', 'afora', 'africa', 'agacha', 'agarra', 'agenda',
-  'agente', 'agil', 'agitac', 'agito', 'agonia', 'agora', 'agosto', 'agrade', 'agrama',
-  'agrava', 'agregar', 'agride', 'agrupa', 'agua', 'agucar', 'aguent', 'agulha', 'ainda',
-  'ajuda', 'ajudar', 'ajuste', 'alado', 'alarme', 'alasta', 'alavanca', 'alazao', 'album',
-  'alcada', 'alcance', 'aldeia', 'alegr', 'alem', 'alerta', 'alfab', 'alface', 'algod',
-  'algum', 'alheia', 'aliado', 'aliar', 'alibab', 'alicia', 'aligat', 'alimen', 'alinhar',
-  'alisar', 'alivia', 'alma', 'almoco', 'alocar', 'aloja', 'alonga', 'alpino', 'alquim',
-  'altar', 'altear', 'altera', 'altivo', 'altura', 'aluci', 'alugar', 'alumen', 'aluno',
-  'alura', 'alvara', 'alvej', 'alvorg', 'amacia', 'amago', 'amanha', 'amansar', 'amante',
-  'amargo', 'amarr', 'amassa', 'amatr', 'amazo', 'ambic', 'ambigu', 'ambito', 'ambul',
-  'amea', 'ameixa', 'amend', 'americ', 'amesar', 'amigo', 'amina', 'aminas', 'amisad',
-  'amoleg', 'amoles', 'amonta', 'amoor', 'amorin', 'amorte', 'amostr', 'amover', 'ampla',
-  'amplo', 'anage', 'analise', 'anana', 'ancora', 'andai', 'andar', 'anela', 'anema',
-  'anexa', 'angel', 'angul', 'anima', 'animar', 'animal', 'anjin', 'aniver', 'anjos',
-  'anona', 'anotar', 'ansea', 'ansio', 'antag', 'antes', 'antigo', 'antol', 'anual',
-  'anula', 'anunci', 'aparar', 'aparte', 'apatia', 'apenas', 'aperf', 'apert', 'apesar',
-  'apice', 'apinh', 'aplau', 'aplica', 'apoia', 'apolo', 'apost', 'apoto', 'apreci',
-  'aprend', 'aprese', 'aprova', 'aprox', 'aptar', 'aptid', 'apura', 'aquec', 'aquela',
-  'aquele', 'aquilo', 'arabia', 'aragem', 'arame', 'aranha', 'aranq', 'arara', 'arava',
-  'arbit', 'arbor', 'arbust', 'arca', 'arcar', 'arceb', 'arcon', 'arder', 'ardil',
-  'areas', 'areia', 'arena', 'argam', 'argila', 'argum', 'arist', 'arma', 'armar',
-  'armas', 'armon', 'aroma', 'arpar', 'arpeo', 'arqui', 'arque', 'arran', 'arras',
-  'arred', 'arren', 'arres', 'arrib', 'arriv', 'arroba', 'arrog', 'arroio', 'arroz',
-  'arrub', 'arrui', 'arruma', 'arseni', 'artei', 'arteria', 'artesa', 'artif', 'artil',
-  'artis', 'artrit', 'arvore', 'asado', 'ascend', 'ascer', 'ascet', 'asent', 'asfal',
-  'asilo', 'asma', 'asno', 'aspar', 'aspas', 'aspear', 'asper', 'aspir', 'assad',
-  'assai', 'assal', 'assam', 'assar', 'assas', 'assat', 'assed', 'asseg', 'assem',
-  'assen', 'asser', 'asses', 'asset', 'assev', 'assib', 'assim', 'assin', 'assis',
-  'assit', 'assiv', 'assob', 'assoc', 'assol', 'assom', 'asson', 'assop', 'assor',
-  'assos', 'assot', 'assov', 'assu', 'assub', 'assuc', 'assud', 'assue', 'assuf',
-  'assug', 'assuh', 'assui', 'assuj', 'assuk', 'assul', 'assum', 'assun', 'assuo',
-  'assup', 'assuq', 'assur', 'assus', 'assut', 'assuv', 'astel', 'astig', 'astil',
-  'astol', 'astro', 'astuc', 'astur', 'ataca', 'atade', 'atajo', 'atale', 'atang',
-  'ataque', 'ataqu', 'atarc', 'atarg', 'atari', 'ataro', 'atars', 'atase', 'atavi',
-  'ateag', 'atear', 'atece', 'atedo', 'atege', 'ateir', 'ateli', 'atemo', 'atena',
-  'atend', 'ateng', 'atent', 'ateor', 'atequ', 'aterr', 'ates', 'atest', 'ateto',
-  'ateve', 'ateza', 'atinga', 'ating', 'atira', 'ativo', 'atlas', 'atomo', 'ator',
-  'atord', 'atorm', 'atorr', 'atrac', 'atrap', 'atras', 'atrav', 'atreg', 'atrel',
-  'atrev', 'atrib', 'atril', 'atriz', 'atuar', 'atual', 'atune', 'aturd', 'audac',
-  'audio', 'auger', 'augur', 'aulao', 'aulea', 'aumag', 'aumen', 'aupar', 'aurea',
-  'aurig', 'auror', 'ausan', 'ausao', 'ausenc', 'austi', 'autom', 'autor', 'autra',
-  'altre', 'outro', 'auxil', 'avaca', 'avanc', 'avang', 'avanq', 'avant', 'avarr',
-  'avast', 'avata', 'aveia', 'avela', 'avenc', 'aveng', 'avent', 'aver', 'aves',
-  'avess', 'avest', 'aveto', 'avetu', 'avez', 'aviao', 'avida', 'avidr', 'avila',
-  'avina', 'avion', 'avios', 'avisg', 'aviso', 'avisp', 'aviss', 'avita', 'avite',
-  'avito', 'avitr', 'avits', 'avitt', 'avitu', 'aviva', 'avive', 'avivo', 'aviw',
-  'avixa', 'aviza', 'avize', 'avizo', 'avoca', 'avoe', 'avoga', 'avola', 'avoli',
-  'avolo', 'avona', 'avonc', 'avond', 'avone', 'avong', 'avonh', 'avoni', 'avonj',
-  'avonk', 'avonl', 'avonm', 'avonn', 'avono', 'avonp', 'avonq', 'avonr', 'avons',
-  'avont', 'avonu', 'avonv', 'avonw', 'avonx', 'avony', 'avonz', 'avopa', 'avope',
-  'avopi', 'avopo', 'avora', 'avore', 'avori', 'avoro', 'avosa', 'avose', 'avosi',
-  'avoso', 'avota', 'avote', 'avoti', 'avoto', 'avoua', 'avoue', 'avoui', 'avouo',
-  'avova', 'avove', 'avovi', 'avovo', 'avowa', 'avowe', 'avowi', 'avowo', 'avoxa',
-  'avoxe', 'avoxi', 'avoxo', 'avoya', 'avoye', 'avoyi', 'avoyo', 'avoza', 'avoze',
-  'avozi', 'avozo', 'axila', 'azaga', 'azara', 'azedo', 'azelo', 'azena', 'azera',
-  'azeta', 'azeve', 'azias', 'azida', 'azilo', 'azima', 'azina', 'azira', 'azita',
-  'azote', 'azoto', 'azuca', 'azuer', 'azuga', 'azula', 'azule', 'azulo', 'azuma',
-  'azura', 'azure', 'azuro',
-  
-  // Additional commonly used words
-  'babel', 'babau', 'bacao', 'bacar', 'bacio', 'bacon', 'bacor', 'badal', 'badan',
-  'badar', 'badas', 'bader', 'bades', 'badin', 'badio', 'bados', 'badul', 'baeta',
-  'bafar', 'bafos', 'bagac', 'bagai', 'bagan', 'bagar', 'bagas', 'bager', 'bages',
-  'bagio', 'bagos', 'bagre', 'bagua', 'bahia', 'baian', 'baiao', 'baias', 'baica',
-  'baico', 'baida', 'baige', 'baila', 'baile', 'bailo', 'baina', 'baine', 'baino',
-  'baira', 'baire', 'bairo', 'baita', 'baite', 'baito', 'baixa', 'baixe', 'baixo',
-  'bambu', 'banan', 'banca', 'banco', 'banda', 'bando', 'bangu', 'banha', 'banho',
-  'banir', 'banjo', 'banza', 'barao', 'barba', 'barbe', 'barbo', 'barca', 'barco',
-  'barda', 'bardo', 'barga', 'barla', 'barma', 'barna', 'baroa', 'baron', 'barra',
-  'barro', 'basca', 'basco', 'basea', 'basel', 'baser', 'bases', 'basia', 'basie',
-  'basil', 'basin', 'basio', 'baska', 'basko', 'basta', 'baste', 'basto', 'batan',
-  'batar', 'batas', 'bated', 'batel', 'baten', 'bater', 'bates', 'bateu', 'batia',
-  'batie', 'batim', 'batin', 'batio', 'batis', 'batiu', 'batle', 'batom', 'bator',
-  'batos', 'batra', 'batre', 'batro', 'batsa', 'batse', 'batso', 'batta', 'batte',
-  'batto', 'beaba', 'bebad', 'bebag', 'bebal', 'beban', 'bebar', 'bebas', 'bebau',
-  'bebax', 'bebay', 'bebaz', 'bebea', 'bebee', 'bebeo', 'bebga', 'bebge', 'bebgo',
-  'bebia', 'bebie', 'bebio', 'becca', 'becce', 'becco', 'becha', 'beche', 'becho',
-  'beira', 'beija', 'beijo', 'belga', 'belle', 'bello', 'bemol', 'berco', 'besta',
-  'bicho', 'bispo', 'bloco', 'boato', 'bobag', 'boina', 'bolsa', 'bolso', 'bomba',
-  'borda', 'bordo', 'braco', 'braga', 'bravo', 'breca', 'breve', 'briga', 'brilh',
-  'brisa', 'broca', 'broto', 'bruxa', 'bruto', 'bucha', 'burro', 'busca', 'cabec',
-  'cabia', 'cabra', 'cabri', 'cacau', 'cacho', 'cacos', 'cadar', 'cadea', 'caido',
-  'caixa', 'calca', 'calco', 'calda', 'caldo', 'calma', 'calmo', 'calor', 'calvo',
-  'camad', 'camar', 'camba', 'cambo', 'campa', 'campo', 'canap', 'canoa', 'cansa',
-  'canso', 'canto', 'capar', 'capaz', 'capit', 'capot', 'capra', 'capuz', 'carac',
-  'carda', 'cargo', 'carne', 'carro', 'carta', 'casar', 'casco', 'caspa', 'casta',
-  'casto', 'causa', 'caval', 'cavao', 'cavar', 'cegon', 'ceifa', 'ceita', 'celar',
-  'cerco', 'certa', 'certo', 'cesar', 'chaca', 'chama', 'chamo', 'chana', 'chapa',
-  'chata', 'chato', 'chave', 'cheia', 'cheio', 'chica', 'chico', 'china', 'chipa',
-  'choca', 'choco', 'chora', 'choro', 'chuva', 'ciclo', 'cidra', 'cifra', 'cigam',
-  'cinca', 'cinco', 'cinta', 'cinto', 'circo', 'cisma', 'cisne', 'cisto', 'citad',
-  'civil', 'clara', 'claro', 'class', 'clima', 'cloro', 'cobra', 'cocar', 'cocha',
-  'cocho', 'codic', 'coice', 'coisa', 'colap', 'colar', 'colet', 'colhe', 'colmo',
-  'colon', 'color', 'colun', 'comai', 'comar', 'comba', 'combo', 'comer', 'comet',
-  'comic', 'comid', 'comit', 'comod', 'comum', 'conca', 'conde', 'conga', 'congo',
-  'conta', 'conte', 'conto', 'copar', 'copia', 'copla', 'corda', 'corja', 'coroa',
-  'corpo', 'corr0', 'corre', 'corso', 'corta', 'corte', 'corvo', 'coser', 'costa',
-  'cotar', 'coton', 'couce', 'couro', 'couve', 'coxao', 'cozid', 'crack', 'cravo',
-  'crema', 'creme', 'crepe', 'cresp', 'crian', 'crime', 'crina', 'criol', 'crise',
-  'crivo', 'croar', 'croat', 'cromo', 'crore', 'cruci', 'cruel', 'cruzr', 'cubar',
-  'cubat', 'cuber', 'cubin', 'cubis', 'cubit', 'cubom', 'cucar', 'cuida', 'cuido',
-  'culap', 'culpa', 'culto', 'cumer', 'cupim', 'cupla', 'curso', 'curva', 'curvo',
-  'cutuc', 'dador', 'damas', 'danif', 'danos', 'dansa', 'dante', 'daqui', 'davao',
-  'debate', 'debil', 'decad', 'decap', 'decas', 'decia', 'decid', 'decim', 'decir',
-  'decis', 'decla', 'decor', 'decre', 'dedao', 'dedor', 'defen', 'defin', 'defor',
-  'deixa', 'deixo', 'delat', 'delic', 'demar', 'demid', 'denim', 'denoc', 'dente',
-  'dento', 'dentr', 'depar', 'depit', 'depoi', 'depot', 'deriv', 'derru', 'desde',
-  'desej', 'desen', 'deser', 'desev', 'desig', 'desmo', 'deson', 'despe', 'despi',
-  'desta', 'deste', 'desto', 'desum', 'detec', 'deter', 'deusa', 'devar', 'dever',
-  'devid', 'diant', 'diare', 'diast', 'dicao', 'dicia', 'dicot', 'dieta', 'difam',
-  'difer', 'digit', 'digno', 'dilat', 'dimas', 'dimin', 'dinam', 'dingo', 'dioic',
-  'diplo', 'dirig', 'disco', 'disma', 'dispa', 'displ', 'dispo', 'dissi', 'disso',
-  'dista', 'diste', 'disto', 'ditad', 'ditar', 'ditav', 'ditei', 'ditem', 'dites',
-  'diteu', 'ditia', 'ditid', 'ditim', 'ditin', 'ditio', 'ditir', 'ditis', 'ditiu',
-  'diton', 'ditoo', 'ditou', 'ditov', 'ditum', 'ditus', 'dituy', 'divas', 'dived',
-  'diver', 'divid', 'divin', 'divul', 'docao', 'docar', 'docem', 'docen', 'docer',
-  'doces', 'doceu', 'docia', 'docid', 'docim', 'docin', 'docio', 'docir', 'docis',
-  'dociu', 'docon', 'docoo', 'docou', 'docov', 'docum', 'docus', 'docuy', 'dodoi',
-  'dogma', 'doido', 'dolao', 'dolar', 'dolem', 'dolen', 'doler', 'doles', 'doleu',
-  'dolia', 'dolid', 'dolim', 'dolin', 'dolio', 'dolir', 'dolis', 'doliu', 'dolon',
-  'doloo', 'dolou', 'dolov', 'dolum', 'dolus', 'doluy', 'domad', 'domai', 'doman',
-  'domar', 'domas', 'domau', 'domav', 'domea', 'domei', 'domen', 'domer', 'domes',
-  'domeu', 'domia', 'domid', 'domin', 'domir', 'domis', 'domiu', 'domoa', 'domoe',
-  'domoo', 'domou', 'domov', 'domua', 'domue', 'domuo', 'domus', 'donad', 'donai',
-  'donan', 'donar', 'donas', 'donau', 'donav', 'donea', 'donei', 'donen', 'doner',
-  'dones', 'doneu', 'donia', 'donid', 'donin', 'donir', 'donis', 'doniu', 'donoa',
-  'donoe', 'donoo', 'donou', 'donov', 'donua', 'donue', 'donuo', 'donus'
-];
+export class WordLoader {
+  private static readonly WORD_LENGTH = 5;
+  public static readonly FILE_PATH = './palavras.txt';
+
+  public static async getRandomWord(): Promise<string> {
+    try {
+      const response = await fetch(this.FILE_PATH);
+      if (!response.ok) throw new Error('Falha ao carregar palavras');
+
+      const fileContent = await response.text();
+      const allWords = fileContent
+        .split('\n')
+        .map(word => word.trim().toLowerCase())
+        .filter(word => word.length === this.WORD_LENGTH);
+
+      if (allWords.length === 0) {
+        throw new Error('Nenhuma palavra de 5 letras encontrada no arquivo');
+      }
+
+      const randomIndex = Math.floor(Math.random() * allWords.length);
+      return allWords[randomIndex];
+    } catch (error) {
+      throw new Error(`Erro ao carregar palavra: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+}
