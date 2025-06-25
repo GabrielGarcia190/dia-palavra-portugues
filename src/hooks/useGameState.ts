@@ -15,6 +15,16 @@ interface GameStats {
   guessDistribution: number[];
 }
 
+interface GameModeState {
+  targetWords: string[];
+  guesses: string[];
+  currentGuess: string;
+  gameStatus: GameStatus;
+  currentRow: number;
+  letterStatuses: Record<string, LetterStatus>;
+  selectedPosition: number;
+}
+
 const WORD_LENGTH = 5;
 
 const getMaxGuesses = (mode: GameMode): number => {
@@ -39,6 +49,16 @@ const getInitialStats = (): GameStats => {
     guessDistribution: [0, 0, 0, 0, 0, 0]
   };
 };
+
+const getInitialGameState = (): GameModeState => ({
+  targetWords: [],
+  guesses: [],
+  currentGuess: ' '.repeat(WORD_LENGTH),
+  gameStatus: 'playing',
+  currentRow: 0,
+  letterStatuses: {},
+  selectedPosition: 0
+});
 
 // Generate target word(s) based on game mode using database
 const getTargetWords = async (mode: GameMode): Promise<string[]> => {
@@ -94,122 +114,143 @@ const getTargetWords = async (mode: GameMode): Promise<string[]> => {
 
 export const useGameState = () => {
   const [gameMode, setGameMode] = useState<GameMode>('normal');
-  const [targetWords, setTargetWords] = useState<string[]>([]);
-  const [guesses, setGuesses] = useState<string[]>([]);
-  const [currentGuess, setCurrentGuess] = useState(' '.repeat(WORD_LENGTH));
-  const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
-  const [currentRow, setCurrentRow] = useState(0);
-  const [letterStatuses, setLetterStatuses] = useState<Record<string, LetterStatus>>({});
+  const [gameStates, setGameStates] = useState<Record<GameMode, GameModeState>>({
+    normal: getInitialGameState(),
+    double: getInitialGameState(),
+    quadruple: getInitialGameState()
+  });
   const [stats, setStats] = useState<GameStats>(getInitialStats);
-  const [selectedPosition, setSelectedPosition] = useState<number>(0);
   const [MAX_GUESSES, setMaxGuesses] = useState<number>(getMaxGuesses('normal'));
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize target words on component mount
+  // Get current game state
+  const currentGameState = gameStates[gameMode];
+  const {
+    targetWords,
+    guesses,
+    currentGuess,
+    gameStatus,
+    currentRow,
+    letterStatuses,
+    selectedPosition
+  } = currentGameState;
+
+  // Initialize target words for all modes on component mount
   useEffect(() => {
-    const initializeWords = async () => {
+    const initializeAllModes = async () => {
       setIsLoading(true);
       try {
-        const words = await getTargetWords('normal');
-        setTargetWords(words);
+        const today = new Date().toDateString();
+        const savedGameStates = localStorage.getItem('allGameStates');
+        let loadedStates: Record<GameMode, GameModeState> = {
+          normal: getInitialGameState(),
+          double: getInitialGameState(),
+          quadruple: getInitialGameState()
+        };
+
+        // Load saved states if they exist and are from today
+        if (savedGameStates) {
+          const parsed = JSON.parse(savedGameStates);
+          if (parsed.date === today) {
+            loadedStates = { ...loadedStates, ...parsed.states };
+          }
+        }
+
+        // Initialize words for each mode if not loaded
+        const modes: GameMode[] = ['normal', 'double', 'quadruple'];
+        for (const mode of modes) {
+          if (loadedStates[mode].targetWords.length === 0) {
+            const words = await getTargetWords(mode);
+            loadedStates[mode] = {
+              ...loadedStates[mode],
+              targetWords: words
+            };
+          }
+        }
+
+        setGameStates(loadedStates);
       } catch (error) {
-        console.error('Erro ao inicializar palavras:', error);
-        setTargetWords(['TERMO']);
+        console.error('Erro ao inicializar modos:', error);
+        // Fallback states
+        setGameStates({
+          normal: { ...getInitialGameState(), targetWords: ['TERMO'] },
+          double: { ...getInitialGameState(), targetWords: ['TERMO', 'JOGO'] },
+          quadruple: { ...getInitialGameState(), targetWords: ['TERMO', 'JOGO', 'CASA', 'VIDA'] }
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
-    initializeWords();
+    initializeAllModes();
   }, []);
 
-  // Load saved game state
+  // Save game states whenever they change
   useEffect(() => {
-    const today = new Date().toDateString();
-    const savedGame = localStorage.getItem('currentGame');
-    
-    if (savedGame) {
-      const gameData = JSON.parse(savedGame);
-      if (gameData.date === today) {
-        setGameMode(gameData.gameMode || 'normal');
-        
-        if (gameData.targetWords && gameData.targetWords.length > 0) {
-          setTargetWords(gameData.targetWords);
-        }
-        
-        setGuesses(gameData.guesses || []);
-        setCurrentGuess(gameData.currentGuess || ' '.repeat(WORD_LENGTH));
-        setGameStatus(gameData.gameStatus || 'playing');
-        setCurrentRow(gameData.currentRow || 0);
-        setLetterStatuses(gameData.letterStatuses || {});
-        setMaxGuesses(getMaxGuesses(gameData.gameMode || 'normal'));
-      }
-    }
-  }, []);
-
-  // Save game state
-  useEffect(() => {
-    if (targetWords.length > 0) {
+    if (!isLoading) {
       const today = new Date().toDateString();
-      const gameData = {
+      const dataToSave = {
         date: today,
-        gameMode,
-        targetWords,
-        guesses,
-        currentGuess,
-        gameStatus,
-        currentRow,
-        letterStatuses
+        states: gameStates
       };
-      localStorage.setItem('currentGame', JSON.stringify(gameData));
+      localStorage.setItem('allGameStates', JSON.stringify(dataToSave));
     }
-  }, [gameMode, targetWords, guesses, currentGuess, gameStatus, currentRow, letterStatuses]);
+  }, [gameStates, isLoading]);
 
   // Change game mode
   const changeGameMode = async (newMode: GameMode) => {
     if (gameMode !== newMode) {
-      setIsLoading(true);
       setGameMode(newMode);
-      
-      try {
-        const newWords = await getTargetWords(newMode);
-        setTargetWords(newWords);
-      } catch (error) {
-        console.error('Erro ao carregar novas palavras:', error);
-        const fallbackWords = ['TERMO', 'JOGO', 'CASA', 'VIDA'];
-        const wordsNeeded = newMode === 'normal' ? 1 : newMode === 'double' ? 2 : 4;
-        setTargetWords(fallbackWords.slice(0, wordsNeeded));
-      }
-      
       setMaxGuesses(getMaxGuesses(newMode));
       
-      // Reset the game
-      setGuesses([]);
-      setCurrentGuess(' '.repeat(WORD_LENGTH));
-      setGameStatus('playing');
-      setCurrentRow(0);
-      setLetterStatuses({});
-      setSelectedPosition(0);
-      setIsLoading(false);
+      // If the new mode doesn't have words yet, load them
+      if (gameStates[newMode].targetWords.length === 0) {
+        setIsLoading(true);
+        try {
+          const words = await getTargetWords(newMode);
+          setGameStates(prev => ({
+            ...prev,
+            [newMode]: {
+              ...prev[newMode],
+              targetWords: words
+            }
+          }));
+        } catch (error) {
+          console.error('Erro ao carregar palavras:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
     }
+  };
+
+  // Update current game state
+  const updateGameState = (updates: Partial<GameModeState>) => {
+    setGameStates(prev => ({
+      ...prev,
+      [gameMode]: {
+        ...prev[gameMode],
+        ...updates
+      }
+    }));
   };
 
   return {
     targetWords,
     guesses,
-    setGuesses,
+    setGuesses: (guesses: string[]) => updateGameState({ guesses }),
     currentGuess,
-    setCurrentGuess,
+    setCurrentGuess: (currentGuess: string) => updateGameState({ currentGuess }),
     gameStatus,
-    setGameStatus,
+    setGameStatus: (gameStatus: GameStatus) => updateGameState({ gameStatus }),
     currentRow,
-    setCurrentRow,
+    setCurrentRow: (currentRow: number) => updateGameState({ currentRow }),
     letterStatuses,
-    setLetterStatuses,
+    setLetterStatuses: (letterStatuses: Record<string, LetterStatus>) => updateGameState({ letterStatuses }),
     stats,
     setStats,
     selectedPosition,
-    setSelectedPosition,
+    setSelectedPosition: (selectedPosition: number) => updateGameState({ selectedPosition }),
     MAX_GUESSES,
     WORD_LENGTH,
     gameMode,
