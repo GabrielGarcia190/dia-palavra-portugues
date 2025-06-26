@@ -1,4 +1,3 @@
-
 import { WordLoader } from '@/data/words';
 import { DailyWordManager } from '@/data/dailyWords';
 import { useState, useEffect } from 'react';
@@ -13,6 +12,12 @@ interface GameStats {
   currentStreak: number;
   maxStreak: number;
   guessDistribution: number[];
+}
+
+interface GameModeStats {
+  normal: GameStats;
+  double: GameStats;
+  quadruple: GameStats;
 }
 
 interface GameModeState {
@@ -36,17 +41,34 @@ const getMaxGuesses = (mode: GameMode): number => {
   }
 };
 
-const getInitialStats = (): GameStats => {
-  const saved = localStorage.getItem('wordleStats');
+const getInitialGameStats = (): GameStats => ({
+  gamesPlayed: 0,
+  gamesWon: 0,
+  currentStreak: 0,
+  maxStreak: 0,
+  guessDistribution: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+});
+
+const getInitialStats = (): GameModeStats => {
+  const saved = localStorage.getItem('wordleStatsByMode');
   if (saved) {
-    return JSON.parse(saved);
+    try {
+      const parsed = JSON.parse(saved);
+      // Garantir que todas as propriedades existam
+      return {
+        normal: { ...getInitialGameStats(), ...parsed.normal },
+        double: { ...getInitialGameStats(), ...parsed.double },
+        quadruple: { ...getInitialGameStats(), ...parsed.quadruple }
+      };
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
+    }
   }
+  
   return {
-    gamesPlayed: 0,
-    gamesWon: 0,
-    currentStreak: 0,
-    maxStreak: 0,
-    guessDistribution: [0, 0, 0, 0, 0, 0]
+    normal: getInitialGameStats(),
+    double: getInitialGameStats(),
+    quadruple: getInitialGameStats()
   };
 };
 
@@ -122,7 +144,7 @@ export const useGameState = () => {
     double: getInitialGameState(),
     quadruple: getInitialGameState()
   });
-  const [stats, setStats] = useState<GameStats>(getInitialStats);
+  const [statsByMode, setStatsByMode] = useState<GameModeStats>(getInitialStats);
   const [MAX_GUESSES, setMaxGuesses] = useState<number>(getMaxGuesses('normal'));
   const [isLoading, setIsLoading] = useState(true);
 
@@ -137,6 +159,9 @@ export const useGameState = () => {
     letterStatuses,
     selectedPosition
   } = currentGameState;
+
+  // Get current mode stats
+  const stats = statsByMode[gameMode];
 
   // Initialize target words for all modes on component mount
   useEffect(() => {
@@ -200,6 +225,11 @@ export const useGameState = () => {
     }
   }, [gameStates, isLoading]);
 
+  // Save stats whenever they change
+  useEffect(() => {
+    localStorage.setItem('wordleStatsByMode', JSON.stringify(statsByMode));
+  }, [statsByMode]);
+
   // Change game mode
   const changeGameMode = async (newMode: GameMode) => {
     if (gameMode !== newMode) {
@@ -235,6 +265,14 @@ export const useGameState = () => {
         ...prev[gameMode],
         ...updates
       }
+    }));
+  };
+
+  // Update stats for current mode
+  const setStats = (newStats: GameStats) => {
+    setStatsByMode(prev => ({
+      ...prev,
+      [gameMode]: newStats
     }));
   };
 

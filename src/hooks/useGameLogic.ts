@@ -109,13 +109,15 @@ export const useGameLogic = (
   const addAccentsToGuess = (guess: string): string => {
     const cleanGuess = guess.replace(/\s/g, '');
     
-    // Tentar encontrar uma palavra alvo que corresponda
+    // Tentar encontrar uma palavra alvo que corresponda (ignorando acentos)
     for (const targetWord of targetWords) {
       if (WordNormalizer.areEqual(cleanGuess, targetWord)) {
+        // Usar a função corrigida para adicionar acentos
         return WordNormalizer.addAccents(cleanGuess, targetWord);
       }
     }
     
+    // Se não encontrar correspondência, retorna a palavra em maiúscula
     return cleanGuess.toUpperCase();
   };
 

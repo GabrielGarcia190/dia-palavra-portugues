@@ -10,16 +10,6 @@ const accentMap: Record<string, string> = {
   'ñ': 'n'
 };
 
-const reverseAccentMap: Record<string, string[]> = {};
-
-// Criar mapeamento reverso
-Object.entries(accentMap).forEach(([accented, plain]) => {
-  if (!reverseAccentMap[plain]) {
-    reverseAccentMap[plain] = [];
-  }
-  reverseAccentMap[plain].push(accented);
-});
-
 export class WordNormalizer {
   /**
    * Remove acentos de uma palavra
@@ -40,7 +30,7 @@ export class WordNormalizer {
       return userInput;
     }
     
-    // Reconstrói a palavra com os acentos corretos
+    // Reconstrói a palavra com os acentos corretos da palavra original
     const result = userInput.toLowerCase().split('').map((char, index) => {
       const originalChar = originalWord[index];
       const normalizedChar = this.removeAccents(char);
