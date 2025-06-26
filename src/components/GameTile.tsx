@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { LetterStatusCalculator } from '@/utils/letterStatusCalculator';
 
 interface GameTileProps {
   letter: string;
@@ -12,6 +13,7 @@ interface GameTileProps {
   rowIndex: number;
   isSelected?: boolean;
   onClick?: () => void;
+  fullWord?: string; // Palavra completa para calcular status correto
 }
 
 export const GameTile: React.FC<GameTileProps> = ({
@@ -23,33 +25,19 @@ export const GameTile: React.FC<GameTileProps> = ({
   tileIndex,
   rowIndex,
   isSelected = false,
-  onClick
+  onClick,
+  fullWord
 }) => {
   const getStatus = () => {
-    if (!isSubmitted) return 'empty';
+    if (!isSubmitted || !fullWord) return 'empty';
     
     const trimmedLetter = letter.trim();
     if (!trimmedLetter) return 'empty';
     
-    // Validar se targetWords existe e tem elementos
     if (!targetWords || targetWords.length === 0) return 'empty';
-    
-    // Check if the letter is in the correct position in any of the target words
-    for (const targetWord of targetWords) {
-      // Validar se a palavra existe e tem o comprimento necessário
-      if (targetWord && targetWord.length > position && trimmedLetter === targetWord[position]) {
-        return 'correct';
-      }
-    }
-    
-    // Check if the letter exists in any of the target words
-    for (const targetWord of targetWords) {
-      if (targetWord && targetWord.includes(trimmedLetter)) {
-        return 'present';
-      }
-    }
-    
-    return 'absent';
+
+    // Usar o novo calculador de status
+    return LetterStatusCalculator.getBestLetterStatus(trimmedLetter, position, fullWord, targetWords);
   };
 
   const status = getStatus();

@@ -1,8 +1,9 @@
-
 import { useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { GameStatus, LetterStatus, GameMode } from './useGameState';
 import { WordLoader } from '@/data/words';
+import { WordNormalizer } from '@/utils/wordNormalizer';
+import { LetterStatusCalculator } from '@/utils/letterStatusCalculator';
 
 interface GameStats {
   gamesPlayed: number;
@@ -33,36 +34,20 @@ export const useGameLogic = (
   gameMode: GameMode
 ) => {
   const isValidWord = async (word: string): Promise<boolean> => {
-    const cleanWord = word.replace(/\s/g, '').toLowerCase();
+    const cleanWord = WordNormalizer.removeAccents(word.replace(/\s/g, '')).toLowerCase();
     if (cleanWord.length !== WORD_LENGTH) return false;
 
     try {
       const response = await fetch(WordLoader.FILE_PATH);
       const words = (await response.text())
         .split('\n')
-        .map(w => w.trim().toLowerCase());
+        .map(w => WordNormalizer.removeAccents(w.trim()).toLowerCase());
 
       return words.includes(cleanWord);
     } catch (error) {
       console.error('Erro ao verificar palavra:', error);
       return false;
     }
-  };
-
-  const getLetterStatus = (letter: string, position: number, targetWord: string): LetterStatus => {
-    if (!letter || letter === ' ') return 'unused';
-
-    const targetLetter = targetWord[position];
-
-    if (letter === targetLetter) {
-      return 'correct';
-    }
-
-    if (targetWord.includes(letter)) {
-      return 'present';
-    }
-
-    return 'absent';
   };
 
   const updateLetterStatusesForAllWords = (word: string) => {
@@ -72,19 +57,8 @@ export const useGameLogic = (
       const letter = word[i];
       if (letter === ' ') continue;
 
-      let bestStatus: LetterStatus = 'absent';
-
-      for (const targetWord of targetWords) {
-        const status = getLetterStatus(letter, i, targetWord);
-
-        if (status === 'correct') {
-          bestStatus = 'correct';
-          break;
-        }
-        else if (status === 'present' && bestStatus === 'absent') {
-          bestStatus = 'present';
-        }
-      }
+      // Usar o novo calculador de status
+      const bestStatus = LetterStatusCalculator.getBestLetterStatus(letter, i, word, targetWords);
 
       const currentStatus = newStatuses[letter];
       if (!currentStatus || currentStatus === 'unused' ||
@@ -116,20 +90,33 @@ export const useGameLogic = (
     localStorage.setItem('wordleStats', JSON.stringify(newStats));
   };
 
-  // Verifica se o palpite atual é igual a qualquer uma das palavras-alvo
   const isGuessMatchingAnyWord = (guess: string): boolean => {
-    const cleanGuess = guess.replace(/\s/g, '').toUpperCase();
-    return targetWords.some(word => cleanGuess === word);
+    const cleanGuess = guess.replace(/\s/g, '');
+    return targetWords.some(targetWord => 
+      WordNormalizer.areEqual(cleanGuess, targetWord)
+    );
   };
 
-  // Verifica se TODAS as palavras-alvo foram acertadas em tentativas anteriores
   const areAllWordsGuessed = (allGuesses: string[]): boolean => {
     return targetWords.every(targetWord => 
       allGuesses.some(guess => {
-        const cleanGuess = guess.replace(/\s/g, '').toUpperCase();
-        return cleanGuess === targetWord;
+        const cleanGuess = guess.replace(/\s/g, '');
+        return WordNormalizer.areEqual(cleanGuess, targetWord);
       })
     );
+  };
+
+  const addAccentsToGuess = (guess: string): string => {
+    const cleanGuess = guess.replace(/\s/g, '');
+    
+    // Tentar encontrar uma palavra alvo que corresponda
+    for (const targetWord of targetWords) {
+      if (WordNormalizer.areEqual(cleanGuess, targetWord)) {
+        return WordNormalizer.addAccents(cleanGuess, targetWord);
+      }
+    }
+    
+    return cleanGuess.toUpperCase();
   };
 
   const submitGuess = useCallback(async () => {
@@ -154,14 +141,15 @@ export const useGameLogic = (
       return;
     }
 
-    const newGuesses = [...guesses, currentGuess];
-    setGuesses(newGuesses);
-    updateLetterStatusesForAllWords(currentGuess);
+    // Adicionar acentos automaticamente se necessário
+    const finalGuess = addAccentsToGuess(cleanGuess);
+    const paddedGuess = finalGuess.padEnd(WORD_LENGTH, ' ');
 
-    // Verifica se o palpite atual acertou alguma palavra
-    const matchedCurrentGuess = isGuessMatchingAnyWord(currentGuess);
-    
-    // Verifica se todas as palavras foram acertadas
+    const newGuesses = [...guesses, paddedGuess];
+    setGuesses(newGuesses);
+    updateLetterStatusesForAllWords(paddedGuess);
+
+    const matchedCurrentGuess = isGuessMatchingAnyWord(paddedGuess);
     const allWordsGuessed = areAllWordsGuessed(newGuesses);
 
     if (allWordsGuessed) {
@@ -182,9 +170,8 @@ export const useGameLogic = (
         variant: "destructive"
       });
     } else if (matchedCurrentGuess) {
-      // Se acertou uma palavra mas não todas, mostra mensagem de progresso
       const wordsLeft = targetWords.length - newGuesses.filter(guess => 
-        targetWords.some(word => guess.replace(/\s/g, '').toUpperCase() === word)
+        targetWords.some(word => WordNormalizer.areEqual(guess.replace(/\s/g, ''), word))
       ).length;
       
       if (wordsLeft > 0) {
@@ -214,7 +201,6 @@ export const useGameLogic = (
     submitGuess,
     resetGame,
     isValidWord,
-    getLetterStatus,
     updateLetterStatusesForAllWords,
     updateStats
   };

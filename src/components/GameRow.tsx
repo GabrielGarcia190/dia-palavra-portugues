@@ -37,6 +37,7 @@ export const GameRow: React.FC<GameRowProps> = ({
             rowIndex={rowIndex}
             isSelected={isCurrentRow && selectedPosition === index}
             onClick={() => isCurrentRow && onTileClick?.(index)}
+            fullWord={word}
           />
         );
       })}
