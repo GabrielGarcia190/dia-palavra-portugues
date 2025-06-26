@@ -52,7 +52,7 @@ export class LetterStatusCalculator {
       // Prioridade: correct > present > absent
       if (currentStatus === 'correct') {
         return 'correct';
-      } else if (currentStatus === 'present' && bestStatus !== 'correct') {
+      } else if (currentStatus === 'present') {
         bestStatus = 'present';
       }
     }
