@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { GameStatus, LetterStatus, GameMode } from './useGameState';
@@ -47,6 +48,7 @@ export const useGameLogic = (
       return false;
     }
   };
+
   const getLetterStatus = (letter: string, position: number, targetWord: string): LetterStatus => {
     if (!letter || letter === ' ') return 'unused';
 
@@ -114,9 +116,20 @@ export const useGameLogic = (
     localStorage.setItem('wordleStats', JSON.stringify(newStats));
   };
 
-  const checkGuessAgainstWords = (guess: string): boolean => {
+  // Verifica se o palpite atual é igual a qualquer uma das palavras-alvo
+  const isGuessMatchingAnyWord = (guess: string): boolean => {
     const cleanGuess = guess.replace(/\s/g, '').toUpperCase();
     return targetWords.some(word => cleanGuess === word);
+  };
+
+  // Verifica se TODAS as palavras-alvo foram acertadas em tentativas anteriores
+  const areAllWordsGuessed = (allGuesses: string[]): boolean => {
+    return targetWords.every(targetWord => 
+      allGuesses.some(guess => {
+        const cleanGuess = guess.replace(/\s/g, '').toUpperCase();
+        return cleanGuess === targetWord;
+      })
+    );
   };
 
   const submitGuess = useCallback(async () => {
@@ -145,12 +158,20 @@ export const useGameLogic = (
     setGuesses(newGuesses);
     updateLetterStatusesForAllWords(currentGuess);
 
-    if (checkGuessAgainstWords(currentGuess)) {
+    // Verifica se o palpite atual acertou alguma palavra
+    const matchedCurrentGuess = isGuessMatchingAnyWord(currentGuess);
+    
+    // Verifica se todas as palavras foram acertadas
+    const allWordsGuessed = areAllWordsGuessed(newGuesses);
+
+    if (allWordsGuessed) {
       setGameStatus('won');
       updateStats(true, newGuesses.length);
+      const wordsCount = targetWords.length;
+      const wordText = wordsCount === 1 ? 'palavra' : 'palavras';
       toast({
         title: "Parabéns! 🎉",
-        description: `Você acertou em ${newGuesses.length} tentativa${newGuesses.length > 1 ? 's' : ''}!`,
+        description: `Você acertou ${wordsCount === 1 ? 'a' : 'as'} ${wordsCount} ${wordText} em ${newGuesses.length} tentativa${newGuesses.length > 1 ? 's' : ''}!`,
       });
     } else if (newGuesses.length >= MAX_GUESSES) {
       setGameStatus('lost');
@@ -160,6 +181,18 @@ export const useGameLogic = (
         description: `As palavras eram: ${targetWords.join(', ')}`,
         variant: "destructive"
       });
+    } else if (matchedCurrentGuess) {
+      // Se acertou uma palavra mas não todas, mostra mensagem de progresso
+      const wordsLeft = targetWords.length - newGuesses.filter(guess => 
+        targetWords.some(word => guess.replace(/\s/g, '').toUpperCase() === word)
+      ).length;
+      
+      if (wordsLeft > 0) {
+        toast({
+          title: "Boa! ✅",
+          description: `Você acertou uma palavra! Ainda ${wordsLeft === 1 ? 'falta' : 'faltam'} ${wordsLeft} palavra${wordsLeft > 1 ? 's' : ''}.`,
+        });
+      }
     }
 
     setCurrentGuess(' '.repeat(WORD_LENGTH));
