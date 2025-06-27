@@ -59,7 +59,6 @@ export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
     );
   }
 
-  const gridsPerRow = gameMode === 'double' ? 2 : 2;
   const totalGrids = gameMode === 'double' ? 2 : 4;
 
   return (
@@ -76,7 +75,7 @@ export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
             onClick={() => onGridClick(gridIndex)}
           >
             <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3 text-center">
-              Palavra {gridIndex + 1}: {targetWords[gridIndex] || '?????'}
+              Palavra {gridIndex + 1}
             </h3>
             
             <div className="space-y-2">
