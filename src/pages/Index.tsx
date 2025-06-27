@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { GameBoard } from '../components/GameBoard';
 import { Keyboard } from '../components/Keyboard';
@@ -21,6 +20,7 @@ const Index = () => {
     targetWords,
     handleKeyPress,
     handleTileClick,
+    handleGridClick,
     handleLetterInput,
     handleBackspaceAtPosition,
     resetGame,
@@ -80,12 +80,6 @@ const Index = () => {
   const handleModeChange = (mode: GameMode) => {
     changeGameMode(mode);
     setShowModeSelector(false);
-  };
-
-  const handleGridClick = (gridIndex: number) => {
-    // Esta função será passada através do hook useGame
-    const { handleGridClick } = useGame();
-    handleGridClick(gridIndex);
   };
 
   return (

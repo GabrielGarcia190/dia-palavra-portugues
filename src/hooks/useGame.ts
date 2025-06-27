@@ -56,6 +56,7 @@ export const useGame = () => {
   const {
     handleKeyPress,
     handleTileClick,
+    handleGridClick,
     handleLetterInput,
     handleBackspaceAtPosition,
     handleArrowNavigation
@@ -84,6 +85,7 @@ export const useGame = () => {
     targetWords,
     handleKeyPress,
     handleTileClick,
+    handleGridClick,
     handleLetterInput,
     handleBackspaceAtPosition,
     resetGame,
