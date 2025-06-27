@@ -17,6 +17,7 @@ const Index = () => {
     currentRow,
     letterStatuses,
     selectedPosition,
+    activeGrid,
     targetWords,
     handleKeyPress,
     handleTileClick,
@@ -81,6 +82,12 @@ const Index = () => {
     setShowModeSelector(false);
   };
 
+  const handleGridClick = (gridIndex: number) => {
+    // Esta função será passada através do hook useGame
+    const { handleGridClick } = useGame();
+    handleGridClick(gridIndex);
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
       darkMode ? 'dark bg-gray-900' : 'bg-gray-50'
@@ -133,7 +140,9 @@ const Index = () => {
             targetWords={targetWords}
             gameStatus={gameStatus}
             selectedPosition={selectedPosition}
+            activeGrid={activeGrid}
             onTileClick={handleTileClick}
+            onGridClick={handleGridClick}
             gameMode={gameMode}
             MAX_GUESSES={MAX_GUESSES}
           />

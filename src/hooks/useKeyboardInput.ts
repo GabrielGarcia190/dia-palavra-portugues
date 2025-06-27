@@ -1,6 +1,7 @@
 
 import { useCallback } from 'react';
 import { GameStatus } from './useGameState';
+import { WordNormalizer } from '@/utils/wordNormalizer';
 
 export const useKeyboardInput = (
   gameStatus: GameStatus,
@@ -8,11 +9,26 @@ export const useKeyboardInput = (
   setCurrentGuess: (guess: string) => void,
   selectedPosition: number,
   setSelectedPosition: (position: number) => void,
+  activeGrid: number,
+  setActiveGrid: (grid: number) => void,
+  targetWords: string[],
+  guesses: string[],
   submitGuess: () => void,
   WORD_LENGTH: number
 ) => {
+  const isWordAlreadyGuessed = (wordIndex: number): boolean => {
+    const targetWord = targetWords[wordIndex];
+    return guesses.some(guess => {
+      const cleanGuess = guess.replace(/\s/g, '');
+      return WordNormalizer.areEqual(cleanGuess, targetWord);
+    });
+  };
+
   const handleLetterInput = useCallback((letter: string) => {
     if (gameStatus !== 'playing') return;
+    
+    // Verificar se a palavra do grid ativo já foi acertada
+    if (isWordAlreadyGuessed(activeGrid)) return;
     
     // Create array with exact length, filling with spaces if needed
     const newGuess = Array.from({ length: WORD_LENGTH }, (_, i) => 
@@ -29,10 +45,13 @@ export const useKeyboardInput = (
     if (selectedPosition < WORD_LENGTH - 1) {
       setSelectedPosition(selectedPosition + 1);
     }
-  }, [gameStatus, currentGuess, selectedPosition, WORD_LENGTH, setCurrentGuess, setSelectedPosition]);
+  }, [gameStatus, currentGuess, selectedPosition, activeGrid, targetWords, guesses, WORD_LENGTH, setCurrentGuess, setSelectedPosition]);
 
   const handleBackspaceAtPosition = useCallback(() => {
     if (gameStatus !== 'playing') return;
+    
+    // Verificar se a palavra do grid ativo já foi acertada
+    if (isWordAlreadyGuessed(activeGrid)) return;
     
     // Create array with exact length, preserving existing letters
     const newGuess = Array.from({ length: WORD_LENGTH }, (_, i) => 
@@ -51,7 +70,7 @@ export const useKeyboardInput = (
       setCurrentGuess(newGuess.join(''));
     }
     
-  }, [gameStatus, currentGuess, selectedPosition, WORD_LENGTH, setCurrentGuess, setSelectedPosition]);
+  }, [gameStatus, currentGuess, selectedPosition, activeGrid, targetWords, guesses, WORD_LENGTH, setCurrentGuess, setSelectedPosition]);
 
   const handleArrowNavigation = useCallback((direction: 'left' | 'right') => {
     if (gameStatus !== 'playing') return;
@@ -84,9 +103,20 @@ export const useKeyboardInput = (
     setSelectedPosition(position);
   }, [gameStatus, setSelectedPosition]);
 
+  const handleGridClick = useCallback((gridIndex: number) => {
+    if (gameStatus !== 'playing') return;
+    
+    // Não permitir selecionar grids de palavras já acertadas
+    if (isWordAlreadyGuessed(gridIndex)) return;
+    
+    setActiveGrid(gridIndex);
+    setSelectedPosition(0);
+  }, [gameStatus, activeGrid, targetWords, guesses, setActiveGrid, setSelectedPosition]);
+
   return {
     handleKeyPress,
     handleTileClick,
+    handleGridClick,
     handleLetterInput,
     handleBackspaceAtPosition,
     handleArrowNavigation

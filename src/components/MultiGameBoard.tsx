@@ -2,6 +2,8 @@
 import React from 'react';
 import { GameRow } from './GameRow';
 import { GameStatus, GameMode } from '../hooks/useGame';
+import { WordNormalizer } from '@/utils/wordNormalizer';
+import { cn } from '@/lib/utils';
 
 interface MultiGameBoardProps {
   guesses: string[];
@@ -10,7 +12,9 @@ interface MultiGameBoardProps {
   targetWords: string[];
   gameStatus: GameStatus;
   selectedPosition: number;
+  activeGrid: number;
   onTileClick: (position: number) => void;
+  onGridClick: (gridIndex: number) => void;
   gameMode: GameMode;
   MAX_GUESSES: number;
 }
@@ -24,7 +28,9 @@ export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
   targetWords,
   gameStatus,
   selectedPosition,
+  activeGrid,
   onTileClick,
+  onGridClick,
   gameMode,
   MAX_GUESSES
 }) => {
@@ -38,6 +44,14 @@ export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
       return ' '.repeat(WORD_LENGTH);
     }
   });
+
+  const isWordAlreadyGuessed = (wordIndex: number): boolean => {
+    const targetWord = targetWords[wordIndex];
+    return guesses.some(guess => {
+      const cleanGuess = guess.replace(/\s/g, '');
+      return WordNormalizer.areEqual(cleanGuess, targetWord);
+    });
+  };
 
   const renderGameModeInfo = () => {
     switch (gameMode) {
@@ -91,24 +105,45 @@ export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
             ? 'grid-cols-1 sm:grid-cols-2' 
             : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
         }`}>
-          {Array.from({ length: gridCount }, (_, gridIndex) => (
-            <div key={gridIndex} className="flex flex-col items-center">
-              <div className="space-y-2">
-                {rows.map((row, rowIndex) => (
-                  <GameRow
-                    key={`${gridIndex}-${rowIndex}`}
-                    word={row}
-                    targetWords={[targetWords[gridIndex]]}
-                    isCurrentRow={rowIndex === currentRow && gameStatus === 'playing'}
-                    isSubmitted={rowIndex < guesses.length}
-                    rowIndex={rowIndex}
-                    selectedPosition={gridIndex === 0 ? selectedPosition : undefined}
-                    onTileClick={gridIndex === 0 ? onTileClick : undefined}
-                  />
-                ))}
+          {Array.from({ length: gridCount }, (_, gridIndex) => {
+            const isActive = gridIndex === activeGrid;
+            const isCompleted = isWordAlreadyGuessed(gridIndex);
+            
+            return (
+              <div 
+                key={gridIndex} 
+                className={cn(
+                  "flex flex-col items-center cursor-pointer transition-all duration-200",
+                  {
+                    "ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900": isActive && !isCompleted,
+                    "opacity-60": isCompleted,
+                    "hover:scale-105": !isCompleted && gameStatus === 'playing'
+                  }
+                )}
+                onClick={() => onGridClick(gridIndex)}
+              >
+                <div className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Palavra {gridIndex + 1}
+                  {isCompleted && <span className="ml-2 text-green-600">✓</span>}
+                  {isActive && !isCompleted && <span className="ml-2 text-blue-600">←</span>}
+                </div>
+                <div className="space-y-2">
+                  {rows.map((row, rowIndex) => (
+                    <GameRow
+                      key={`${gridIndex}-${rowIndex}`}
+                      word={row}
+                      targetWords={[targetWords[gridIndex]]}
+                      isCurrentRow={rowIndex === currentRow && gameStatus === 'playing' && isActive && !isCompleted}
+                      isSubmitted={rowIndex < guesses.length}
+                      rowIndex={rowIndex}
+                      selectedPosition={isActive && !isCompleted ? selectedPosition : undefined}
+                      onTileClick={isActive && !isCompleted ? onTileClick : undefined}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
