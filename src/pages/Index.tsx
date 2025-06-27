@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { GameBoard } from '../components/GameBoard';
 import { Keyboard } from '../components/Keyboard';
@@ -17,9 +16,11 @@ const Index = () => {
     currentRow,
     letterStatuses,
     selectedPosition,
+    activeGrid,
     targetWords,
     handleKeyPress,
     handleTileClick,
+    handleGridClick,
     handleLetterInput,
     handleBackspaceAtPosition,
     resetGame,
@@ -133,7 +134,9 @@ const Index = () => {
             targetWords={targetWords}
             gameStatus={gameStatus}
             selectedPosition={selectedPosition}
+            activeGrid={activeGrid}
             onTileClick={handleTileClick}
+            onGridClick={handleGridClick}
             gameMode={gameMode}
             MAX_GUESSES={MAX_GUESSES}
           />

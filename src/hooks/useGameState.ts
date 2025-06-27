@@ -28,6 +28,7 @@ interface GameModeState {
   currentRow: number;
   letterStatuses: Record<string, LetterStatus>;
   selectedPosition: number;
+  activeGrid: number; // Nova propriedade para grid ativo
 }
 
 const WORD_LENGTH = 5;
@@ -79,7 +80,8 @@ const getInitialGameState = (): GameModeState => ({
   gameStatus: 'playing',
   currentRow: 0,
   letterStatuses: {},
-  selectedPosition: 0
+  selectedPosition: 0,
+  activeGrid: 0 // Grid ativo inicial
 });
 
 // Generate target word(s) based on game mode using database
@@ -157,7 +159,8 @@ export const useGameState = () => {
     gameStatus,
     currentRow,
     letterStatuses,
-    selectedPosition
+    selectedPosition,
+    activeGrid
   } = currentGameState;
 
   // Get current mode stats
@@ -292,6 +295,8 @@ export const useGameState = () => {
     setStats,
     selectedPosition,
     setSelectedPosition: (selectedPosition: number) => updateGameState({ selectedPosition }),
+    activeGrid,
+    setActiveGrid: (activeGrid: number) => updateGameState({ activeGrid }),
     MAX_GUESSES,
     WORD_LENGTH,
     gameMode,
