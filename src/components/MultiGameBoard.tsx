@@ -62,16 +62,12 @@ export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
   const totalGrids = gameMode === 'double' ? 2 : 4;
 
   return (
-    <div className="w-full max-w-6xl mx-auto mb-8">
-      <div className="grid gap-6" style={{
-        gridTemplateColumns: gameMode === 'quadruple' 
-          ? 'repeat(2, minmax(0, 1fr))' 
-          : 'repeat(2, minmax(0, 1fr))'
-      }}>
+    <div className="max-w-sm mx-auto mb-8">
+      <div className="space-y-8">
         {Array.from({ length: totalGrids }, (_, gridIndex) => (
           <div
             key={gridIndex}
-            className="bg-white dark:bg-gray-800 rounded-lg p-4 border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-colors"
+            className="cursor-pointer"
             onClick={() => onGridClick(gridIndex)}
           >
             <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3 text-center">
