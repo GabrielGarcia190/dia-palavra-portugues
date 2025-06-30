@@ -3,13 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./wordle.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model DailyWord {
-  id    Int    @id @default(autoincrement())
-  date  DateTime 
+  id    Int      @id @default(autoincrement())
+  date  DateTime
   mode  String
   word  String
   words String
