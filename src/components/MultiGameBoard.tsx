@@ -22,7 +22,6 @@ export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
   currentGuess,
   currentRow,
   targetWords,
-  gameStatus,
   selectedPosition,
   activeGrid,
   onTileClick,

@@ -59,7 +59,6 @@ export const useGame = () => {
     handleGridClick,
     handleLetterInput,
     handleBackspaceAtPosition,
-    handleArrowNavigation
   } = useKeyboardInput(
     gameStatus,
     currentGuess,

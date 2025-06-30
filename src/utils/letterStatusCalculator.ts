@@ -2,9 +2,7 @@
 import { LetterStatus } from '@/hooks/useGameState';
 
 export class LetterStatusCalculator {
-  /**
-   * Calcula o status de cada letra considerando duplicatas
-   */
+
   static calculateLetterStatuses(guess: string, targetWord: string): LetterStatus[] {
     const guessArray = guess.split('');
     const targetArray = targetWord.split('');
@@ -12,12 +10,10 @@ export class LetterStatusCalculator {
     const targetLetterCount: Record<string, number> = {};
     const usedTargetPositions = new Set<number>();
 
-    // Contar letras na palavra alvo
     targetArray.forEach(letter => {
       targetLetterCount[letter] = (targetLetterCount[letter] || 0) + 1;
     });
 
-    // Primeira passada: marcar letras corretas (verdes)
     guessArray.forEach((letter, index) => {
       if (letter === targetArray[index]) {
         result[index] = 'correct';
@@ -26,7 +22,6 @@ export class LetterStatusCalculator {
       }
     });
 
-    // Segunda passada: marcar letras presentes mas na posição errada (amarelas)
     guessArray.forEach((letter, index) => {
       if (result[index] !== 'correct') {
         if (targetLetterCount[letter] > 0) {
@@ -39,9 +34,6 @@ export class LetterStatusCalculator {
     return result;
   }
 
-  /**
-   * Calcula o melhor status para uma letra considerando múltiplas palavras alvo
-   */
   static getBestLetterStatus(letter: string, position: number, guess: string, targetWords: string[]): LetterStatus {
     let bestStatus: LetterStatus = 'absent';
 
@@ -49,7 +41,6 @@ export class LetterStatusCalculator {
       const statuses = this.calculateLetterStatuses(guess, targetWord);
       const currentStatus = statuses[position];
 
-      // Prioridade: correct > present > absent
       if (currentStatus === 'correct') {
         return 'correct';
       } else if (currentStatus === 'present') {

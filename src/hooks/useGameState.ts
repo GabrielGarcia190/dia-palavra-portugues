@@ -1,3 +1,4 @@
+'use client';
 import { WordLoader } from '@/data/words';
 import { DailyWordManager } from '@/data/dailyWords';
 import { useState, useEffect } from 'react';
@@ -51,11 +52,20 @@ const getInitialGameStats = (): GameStats => ({
 });
 
 const getInitialStats = (): GameModeStats => {
+
+  if (typeof window === 'undefined') {
+    return {
+      normal: getInitialGameStats(),
+      double: getInitialGameStats(),
+      quadruple: getInitialGameStats()
+    };
+  }
+
   const saved = localStorage.getItem('wordleStatsByMode');
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      // Garantir que todas as propriedades existam
+
       return {
         normal: { ...getInitialGameStats(), ...parsed.normal },
         double: { ...getInitialGameStats(), ...parsed.double },
@@ -65,7 +75,7 @@ const getInitialStats = (): GameModeStats => {
       console.error('Erro ao carregar estatísticas:', error);
     }
   }
-  
+
   return {
     normal: getInitialGameStats(),
     double: getInitialGameStats(),
@@ -81,57 +91,52 @@ const getInitialGameState = (): GameModeState => ({
   currentRow: 0,
   letterStatuses: {},
   selectedPosition: 0,
-  activeGrid: 0 // Grid ativo inicial
+  activeGrid: 0
 });
 
-// Generate target word(s) based on game mode using database
 const getTargetWords = async (mode: GameMode): Promise<string[]> => {
   const today = new Date();
-  const dateString = today.toDateString();
-  
+
   try {
-    // Limpar palavras antigas
+
     await DailyWordManager.clearOldWords();
-    
-    // Tentar buscar palavras do banco
-    const savedWords = await DailyWordManager.getDailyWords(dateString, mode);
+
+    const savedWords = await DailyWordManager.getDailyWords(today.toDateString(), mode);
+
     if (savedWords && savedWords.length > 0) {
-      console.log(`Usando palavras salvas para ${mode}:`, savedWords);
       return savedWords;
     }
-    
-    // Gerar novas palavras se não existirem no banco
+
+    await DailyWordManager.clearOldWords();
+
     const wordsNeeded = mode === 'normal' ? 1 : mode === 'double' ? 2 : 4;
     const words: string[] = [];
-    
-    // Gerar palavras únicas
+
     for (let i = 0; i < wordsNeeded; i++) {
       let newWord;
       let attempts = 0;
       const maxAttempts = 50;
-      
+
       do {
         newWord = await WordLoader.getRandomWord();
         newWord = newWord.toUpperCase();
         attempts++;
-        
+
         if (attempts > maxAttempts) {
           newWord = newWord + '_' + i;
           break;
         }
       } while (words.includes(newWord));
-      
+
       words.push(newWord);
     }
-    
+
     console.log(`Gerando novas palavras para ${mode}:`, words);
-    
-    // Salvar no banco
-    await DailyWordManager.saveDailyWords(dateString, mode, words);
-    
+
+    await DailyWordManager.saveDailyWords(today, mode, words);
+
     return words;
-  } catch (error) {
-    console.error('Erro ao carregar palavras:', error);
+  } catch  {
     // Fallback: usar palavras padrão
     const fallbackWords = ['TERMO', 'JOGO', 'CASA', 'VIDA'];
     const wordsNeeded = mode === 'normal' ? 1 : mode === 'double' ? 2 : 4;
@@ -216,7 +221,6 @@ export const useGameState = () => {
     initializeAllModes();
   }, []);
 
-  // Save game states whenever they change
   useEffect(() => {
     if (!isLoading) {
       const today = new Date().toDateString();
@@ -228,9 +232,10 @@ export const useGameState = () => {
     }
   }, [gameStates, isLoading]);
 
-  // Save stats whenever they change
   useEffect(() => {
-    localStorage.setItem('wordleStatsByMode', JSON.stringify(statsByMode));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('wordleStatsByMode', JSON.stringify(statsByMode));
+    }
   }, [statsByMode]);
 
   // Change game mode
@@ -238,7 +243,7 @@ export const useGameState = () => {
     if (gameMode !== newMode) {
       setGameMode(newMode);
       setMaxGuesses(getMaxGuesses(newMode));
-      
+
       // If the new mode doesn't have words yet, load them
       if (gameStates[newMode].targetWords.length === 0) {
         setIsLoading(true);

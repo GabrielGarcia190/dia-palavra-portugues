@@ -42,7 +42,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
         setNextWordTime(DailyWordManager.getNextWordTime());
       };
       
-      updateTimer(); // Atualizar imediatamente
+      updateTimer();
       const interval = setInterval(updateTimer, 1000);
       
       return () => clearInterval(interval);
@@ -86,8 +86,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
           description: "Resultado copiado para a área de transferência",
         });
       }
-    } catch (error) {
-      // Fallback for older browsers
+    } catch  {
       const textArea = document.createElement('textarea');
       textArea.value = shareText;
       document.body.appendChild(textArea);

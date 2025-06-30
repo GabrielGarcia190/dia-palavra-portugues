@@ -9,7 +9,7 @@ datasource db {
 
 model DailyWord {
   id    Int    @id @default(autoincrement())
-  date  String
+  date  DateTime 
   mode  String
   word  String
   words String
