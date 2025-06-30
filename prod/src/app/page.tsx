@@ -10,9 +10,10 @@ import { HelpModal } from '../components/HelpModal';
 import { useGame, GameMode } from '../hooks/useGame';
 import { Toaster } from "@/components/ui/toaster";
 import { Button } from '@/components/ui/button';
+import { useTheme } from 'next-themes';
 
 export default function Home() {
-   const {
+  const {
     guesses,
     currentGuess,
     gameStatus,
@@ -36,23 +37,13 @@ export default function Home() {
   const [showStats, setShowStats] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showModeSelector, setShowModeSelector] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     setIsMounted(true);
-    const saved = localStorage.getItem('darkMode');
-    if (saved !== null) {
-      setDarkMode(JSON.parse(saved));
-    }
   }, []);
-
-  useEffect(() => {
-    if (isMounted) {
-      document.documentElement.classList.toggle('dark', darkMode);
-      localStorage.setItem('darkMode', JSON.stringify(darkMode));
-    }
-  }, [darkMode, isMounted]);
 
   useEffect(() => {
     const handleKeyboard = (e: KeyboardEvent) => {
@@ -89,23 +80,29 @@ export default function Home() {
     setShowModeSelector(false);
   };
 
+  const toggleDarkMode = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  // Prevent hydration mismatch
+  if (!isMounted) {
+    return null;
+  }
+
   return (
- <div className={`min-h-screen transition-colors duration-300 ${
-      // 4. Aplica dark mode apenas após montagem para evitar mismatch
-      isMounted && darkMode ? 'dark bg-gray-900' : 'bg-gray-50'
-    }`}>
+    <div className="min-h-screen transition-colors duration-300 bg-background text-foreground">
       <div className={`${gameMode === 'normal' ? 'max-w-lg' : 'max-w-full'} mx-auto px-4`}>
         <Header 
           onStatsClick={() => setShowStats(true)}
           onHelpClick={() => setShowHelp(true)}
-          onToggleDarkMode={() => setDarkMode(!darkMode)}
+          onToggleDarkMode={toggleDarkMode}
           onModeClick={() => setShowModeSelector(true)}
-          darkMode={darkMode}
+          darkMode={theme === 'dark'}
         />
         
         {showModeSelector && (
-          <div className="mb-6 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-md max-w-lg mx-auto">
-            <h3 className="text-lg font-medium mb-3 text-center text-gray-900 dark:text-white">
+          <div className="mb-6 p-3 bg-card rounded-lg shadow-md max-w-lg mx-auto">
+            <h3 className="text-lg font-medium mb-3 text-center text-card-foreground">
               Escolha um modo de jogo
             </h3>
             <div className="flex flex-col gap-3">

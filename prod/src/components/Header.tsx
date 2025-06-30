@@ -19,19 +19,19 @@ export const Header: React.FC<HeaderProps> = ({
   darkMode
 }) => {
   return (
-    <header className="border-b border-gray-200 dark:border-gray-700 py-4 mb-4">
+    <header className="border-b border-border py-4 mb-4">
       <div className="max-w-lg mx-auto px-4">
         <div className="flex justify-between items-center">
           <Button
             variant="ghost"
             size="icon"
             onClick={onHelpClick}
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            className="text-muted-foreground hover:text-foreground"
           >
             <HelpCircle className="h-6 w-6" />
           </Button>
 
-          <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-center text-foreground">
             PALAVRA
           </h1>
 
@@ -40,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
               variant="ghost"
               size="icon"
               onClick={onToggleDarkMode}
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              className="text-muted-foreground hover:text-foreground"
             >
               {darkMode ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
             </Button>
@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
               variant="ghost"
               size="icon"
               onClick={onModeClick}
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              className="text-muted-foreground hover:text-foreground"
             >
               <Layers className="h-6 w-6" />
             </Button>
@@ -58,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
               variant="ghost"
               size="icon"
               onClick={onStatsClick}
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              className="text-muted-foreground hover:text-foreground"
             >
               <BarChart3 className="h-6 w-6" />
             </Button>
