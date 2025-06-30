@@ -29,6 +29,7 @@ interface GameModeState {
   currentRow: number;
   letterStatuses: Record<string, LetterStatus>;
   selectedPosition: number;
+  activeGrid: number; // Nova propriedade para grid ativo
 }
 
 const WORD_LENGTH = 5;
@@ -64,6 +65,7 @@ const getInitialStats = (): GameModeStats => {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
+
       return {
         normal: { ...getInitialGameStats(), ...parsed.normal },
         double: { ...getInitialGameStats(), ...parsed.double },
@@ -88,14 +90,16 @@ const getInitialGameState = (): GameModeState => ({
   gameStatus: 'playing',
   currentRow: 0,
   letterStatuses: {},
-  selectedPosition: 0
+  selectedPosition: 0,
+  activeGrid: 0
 });
 
 const getTargetWords = async (mode: GameMode): Promise<string[]> => {
-
   const today = new Date();
 
   try {
+
+    await DailyWordManager.clearOldWords();
 
     const savedWords = await DailyWordManager.getDailyWords(today.toDateString(), mode);
 
@@ -132,7 +136,6 @@ const getTargetWords = async (mode: GameMode): Promise<string[]> => {
     await DailyWordManager.saveDailyWords(today, mode, words);
 
     return words;
-    
   } catch  {
     // Fallback: usar palavras padrão
     const fallbackWords = ['TERMO', 'JOGO', 'CASA', 'VIDA'];
@@ -148,7 +151,7 @@ export const useGameState = () => {
     double: getInitialGameState(),
     quadruple: getInitialGameState()
   });
-  const [statsByMode, setStatsByMode] = useState<GameModeStats>(() => getInitialStats());
+  const [statsByMode, setStatsByMode] = useState<GameModeStats>(getInitialStats);
   const [MAX_GUESSES, setMaxGuesses] = useState<number>(getMaxGuesses('normal'));
   const [isLoading, setIsLoading] = useState(true);
 
@@ -161,7 +164,8 @@ export const useGameState = () => {
     gameStatus,
     currentRow,
     letterStatuses,
-    selectedPosition
+    selectedPosition,
+    activeGrid
   } = currentGameState;
 
   // Get current mode stats
@@ -173,20 +177,18 @@ export const useGameState = () => {
       setIsLoading(true);
       try {
         const today = new Date().toDateString();
+        const savedGameStates = localStorage.getItem('allGameStates');
         let loadedStates: Record<GameMode, GameModeState> = {
           normal: getInitialGameState(),
           double: getInitialGameState(),
           quadruple: getInitialGameState()
         };
 
-        // Load saved states only on client side
-        if (typeof window !== 'undefined') {
-          const savedGameStates = localStorage.getItem('allGameStates');
-          if (savedGameStates) {
-            const parsed = JSON.parse(savedGameStates);
-            if (parsed.date === today) {
-              loadedStates = { ...loadedStates, ...parsed.states };
-            }
+        // Load saved states if they exist and are from today
+        if (savedGameStates) {
+          const parsed = JSON.parse(savedGameStates);
+          if (parsed.date === today) {
+            loadedStates = { ...loadedStates, ...parsed.states };
           }
         }
 
@@ -219,9 +221,8 @@ export const useGameState = () => {
     initializeAllModes();
   }, []);
 
-  // Save game states whenever they change (client-side only)
   useEffect(() => {
-    if (!isLoading && typeof window !== 'undefined') {
+    if (!isLoading) {
       const today = new Date().toDateString();
       const dataToSave = {
         date: today,
@@ -231,7 +232,6 @@ export const useGameState = () => {
     }
   }, [gameStates, isLoading]);
 
-  // Save stats whenever they change (client-side only)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('wordleStatsByMode', JSON.stringify(statsByMode));
@@ -300,6 +300,8 @@ export const useGameState = () => {
     setStats,
     selectedPosition,
     setSelectedPosition: (selectedPosition: number) => updateGameState({ selectedPosition }),
+    activeGrid,
+    setActiveGrid: (activeGrid: number) => updateGameState({ activeGrid }),
     MAX_GUESSES,
     WORD_LENGTH,
     gameMode,

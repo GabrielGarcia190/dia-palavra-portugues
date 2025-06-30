@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { GameStatus, LetterStatus } from './useGameState';
+import { GameStatus, LetterStatus, GameMode } from './useGameState';
 import { WordLoader } from '@/data/words';
 import { WordNormalizer } from '@/utils/wordNormalizer';
 import { LetterStatusCalculator } from '@/utils/letterStatusCalculator';
@@ -29,8 +29,11 @@ export const useGameLogic = (
   setStats: (stats: GameStats) => void,
   selectedPosition: number,
   setSelectedPosition: (position: number) => void,
+  activeGrid: number,
+  setActiveGrid: (grid: number) => void,
   MAX_GUESSES: number,
   WORD_LENGTH: number,
+  gameMode: GameMode
 ) => {
   const isValidWord = async (word: string): Promise<boolean> => {
     const cleanWord = WordNormalizer.removeAccents(word.replace(/\s/g, '')).toLowerCase();
@@ -56,6 +59,7 @@ export const useGameLogic = (
       const letter = word[i];
       if (letter === ' ') continue;
 
+      // Usar o novo calculador de status
       const bestStatus = LetterStatusCalculator.getBestLetterStatus(letter, i, word, targetWords);
 
       const currentStatus = newStatuses[letter];
@@ -102,6 +106,23 @@ export const useGameLogic = (
         return WordNormalizer.areEqual(cleanGuess, targetWord);
       })
     );
+  };
+
+  const isWordAlreadyGuessed = (wordIndex: number, allGuesses: string[]): boolean => {
+    const targetWord = targetWords[wordIndex];
+    return allGuesses.some(guess => {
+      const cleanGuess = guess.replace(/\s/g, '');
+      return WordNormalizer.areEqual(cleanGuess, targetWord);
+    });
+  };
+
+  const getNextAvailableGrid = (allGuesses: string[]): number => {
+    for (let i = 0; i < targetWords.length; i++) {
+      if (!isWordAlreadyGuessed(i, allGuesses)) {
+        return i;
+      }
+    }
+    return 0; // Fallback
   };
 
   const addAccentsToGuess = (guess: string): string => {
@@ -180,12 +201,18 @@ export const useGameLogic = (
           description: `Você acertou uma palavra! Ainda ${wordsLeft === 1 ? 'falta' : 'faltam'} ${wordsLeft} palavra${wordsLeft > 1 ? 's' : ''}.`,
         });
       }
+
+      // Mudar para próxima grade disponível se não for modo normal
+      if (gameMode !== 'normal') {
+        const nextGrid = getNextAvailableGrid(newGuesses);
+        setActiveGrid(nextGrid);
+      }
     }
 
     setCurrentGuess(' '.repeat(WORD_LENGTH));
     setCurrentRow(currentRow + 1);
     setSelectedPosition(0);
-  }, [currentGuess, guesses, targetWords, currentRow, letterStatuses, stats, WORD_LENGTH, MAX_GUESSES]);
+  }, [currentGuess, guesses, targetWords, currentRow, letterStatuses, stats, activeGrid, WORD_LENGTH, MAX_GUESSES, gameMode]);
 
   const resetGame = () => {
     setGuesses([]);
@@ -194,6 +221,7 @@ export const useGameLogic = (
     setCurrentRow(0);
     setLetterStatuses({});
     setSelectedPosition(0);
+    setActiveGrid(0);
     localStorage.removeItem('currentGame');
   };
 
@@ -202,6 +230,7 @@ export const useGameLogic = (
     resetGame,
     isValidWord,
     updateLetterStatusesForAllWords,
-    updateStats
+    updateStats,
+    isWordAlreadyGuessed
   };
 };

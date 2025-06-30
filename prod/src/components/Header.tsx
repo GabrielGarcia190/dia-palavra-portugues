@@ -31,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
             <HelpCircle className="h-6 w-6" />
           </Button>
 
-          <h1 className="text-3xl font-bold text-center text-black dark:text-white">
+          <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white">
             PALAVRA
           </h1>
 

@@ -22,6 +22,8 @@ export const useGame = () => {
     setStats,
     selectedPosition,
     setSelectedPosition,
+    activeGrid,
+    setActiveGrid,
     MAX_GUESSES,
     WORD_LENGTH,
     gameMode,
@@ -44,13 +46,17 @@ export const useGame = () => {
     setStats,
     selectedPosition,
     setSelectedPosition,
+    activeGrid,
+    setActiveGrid,
     MAX_GUESSES,
-    WORD_LENGTH
+    WORD_LENGTH,
+    gameMode
   );
 
   const {
     handleKeyPress,
     handleTileClick,
+    handleGridClick,
     handleLetterInput,
     handleBackspaceAtPosition,
   } = useKeyboardInput(
@@ -59,6 +65,10 @@ export const useGame = () => {
     setCurrentGuess,
     selectedPosition,
     setSelectedPosition,
+    activeGrid,
+    setActiveGrid,
+    targetWords,
+    guesses,
     submitGuess,
     WORD_LENGTH
   );
@@ -70,9 +80,11 @@ export const useGame = () => {
     currentRow,
     letterStatuses,
     selectedPosition,
+    activeGrid,
     targetWords,
     handleKeyPress,
     handleTileClick,
+    handleGridClick,
     handleLetterInput,
     handleBackspaceAtPosition,
     resetGame,

@@ -10,114 +10,108 @@ interface MultiGameBoardProps {
   targetWords: string[];
   gameStatus: GameStatus;
   selectedPosition: number;
+  activeGrid: number;
   onTileClick: (position: number) => void;
+  onGridClick: (gridIndex: number) => void;
   gameMode: GameMode;
   MAX_GUESSES: number;
 }
-
-const WORD_LENGTH = 5;
 
 export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
   guesses,
   currentGuess,
   currentRow,
   targetWords,
-  gameStatus,
   selectedPosition,
+  activeGrid,
   onTileClick,
+  onGridClick,
   gameMode,
   MAX_GUESSES
 }) => {
-  const rows = Array.from({ length: MAX_GUESSES }, (_, index) => {
-    if (index < guesses.length) {
-      const guess = guesses[index];
-      return guess.length >= WORD_LENGTH ? guess.slice(0, WORD_LENGTH) : guess.padEnd(WORD_LENGTH, ' ');
-    } else if (index === currentRow && gameStatus === 'playing') {
-      return currentGuess.length >= WORD_LENGTH ? currentGuess.slice(0, WORD_LENGTH) : currentGuess.padEnd(WORD_LENGTH, ' ');
-    } else {
-      return ' '.repeat(WORD_LENGTH);
-    }
-  });
-
-  const renderGameModeInfo = () => {
-    switch (gameMode) {
-      case 'normal':
-        return <div className="text-center mb-4 text-gray-600 dark:text-gray-300">Modo Normal</div>;
-      case 'double':
-        return (
-          <div className="text-center mb-4 text-gray-600 dark:text-gray-300">
-            Modo Duplo - Duas palavras simultaneamente
-          </div>
-        );
-      case 'quadruple':
-        return (
-          <div className="text-center mb-4 text-gray-600 dark:text-gray-300">
-            Modo Quádruplo - Quatro palavras simultaneamente
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const renderGrids = () => {
-    if (gameMode === 'normal') {
-      return (
-        <div className="max-w-sm mx-auto">
-          <div className="grid gap-2">
-            {rows.map((row, index) => (
-              <GameRow
-                key={index}
-                word={row}
-                targetWords={[targetWords[0]]}
-                isCurrentRow={index === currentRow && gameStatus === 'playing'}
-                isSubmitted={index < guesses.length}
-                rowIndex={index}
-                selectedPosition={selectedPosition}
-                onTileClick={onTileClick}
-              />
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    const gridCount = gameMode === 'double' ? 2 : 4;
-    
+  if (gameMode === 'normal') {
     return (
-      <div className="w-full max-w-none mx-auto px-4">
-        <div className={`grid gap-8 ${
-          gameMode === 'double' 
-            ? 'grid-cols-1 sm:grid-cols-2' 
-            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
-        }`}>
-          {Array.from({ length: gridCount }, (_, gridIndex) => (
-            <div key={gridIndex} className="flex flex-col items-center">
-              <div className="space-y-2">
-                {rows.map((row, rowIndex) => (
-                  <GameRow
-                    key={`${gridIndex}-${rowIndex}`}
-                    word={row}
-                    targetWords={[targetWords[gridIndex]]}
-                    isCurrentRow={rowIndex === currentRow && gameStatus === 'playing'}
-                    isSubmitted={rowIndex < guesses.length}
-                    rowIndex={rowIndex}
-                    selectedPosition={gridIndex === 0 ? selectedPosition : undefined}
-                    onTileClick={gridIndex === 0 ? onTileClick : undefined}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+      <div className="max-w-sm mx-auto mb-8">
+        <div className="space-y-2">
+          {Array.from({ length: MAX_GUESSES }, (_, rowIndex) => {
+            const word = rowIndex < guesses.length 
+              ? guesses[rowIndex] 
+              : rowIndex === currentRow 
+                ? currentGuess 
+                : '';
+                
+            return (
+              <GameRow
+                key={rowIndex}
+                word={word}
+                targetWords={targetWords}
+                isCurrentRow={rowIndex === currentRow}
+                isSubmitted={rowIndex < guesses.length}
+                rowIndex={rowIndex}
+                selectedPosition={rowIndex === currentRow ? selectedPosition : undefined}
+                onTileClick={rowIndex === currentRow ? onTileClick : undefined}
+              />
+            );
+          })}
         </div>
       </div>
     );
-  };
+  }
+
+  const totalGrids = gameMode === 'double' ? 2 : 4;
 
   return (
-    <div className="mb-8">
-      {renderGameModeInfo()}
-      {renderGrids()}
+    <div className="w-full mb-8">
+      <div className={`${
+        gameMode === 'double' 
+          ? 'max-w-4xl mx-auto grid grid-cols-2 gap-12' 
+          : 'max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4'
+      }`}>
+        {Array.from({ length: totalGrids }, (_, gridIndex) => (
+          <div
+            key={gridIndex}
+            className="flex flex-col items-center"
+          >
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3 text-center">
+              Palavra {gridIndex + 1}
+            </h3>
+            
+            <div className="space-y-2">
+              {Array.from({ length: MAX_GUESSES }, (_, rowIndex) => {
+                const word = rowIndex < guesses.length 
+                  ? guesses[rowIndex] 
+                  : rowIndex === currentRow
+                    ? currentGuess 
+                    : '';
+                    
+                return (
+                  <GameRow
+                    key={rowIndex}
+                    word={word}
+                    targetWords={[targetWords[gridIndex]]}
+                    isCurrentRow={rowIndex === currentRow}
+                    isSubmitted={rowIndex < guesses.length}
+                    rowIndex={rowIndex}
+                    selectedPosition={
+                      rowIndex === currentRow && gridIndex === activeGrid 
+                        ? selectedPosition 
+                        : undefined
+                    }
+                    onTileClick={
+                      rowIndex === currentRow 
+                        ? (position: number) => {
+                            onGridClick(gridIndex);
+                            onTileClick(position);
+                          }
+                        : undefined
+                    }
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

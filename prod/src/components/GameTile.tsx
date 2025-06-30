@@ -9,9 +9,11 @@ interface GameTileProps {
   position: number;
   isCurrentRow: boolean;
   isSubmitted: boolean;
+  tileIndex: number;
+  rowIndex: number;
   isSelected?: boolean;
   onClick?: () => void;
-  fullWord?: string;
+  fullWord?: string; // Palavra completa para calcular status correto
 }
 
 export const GameTile: React.FC<GameTileProps> = ({
@@ -32,6 +34,7 @@ export const GameTile: React.FC<GameTileProps> = ({
     
     if (!targetWords || targetWords.length === 0) return 'empty';
 
+    // Usar o novo calculador de status
     return LetterStatusCalculator.getBestLetterStatus(trimmedLetter, position, fullWord, targetWords);
   };
 

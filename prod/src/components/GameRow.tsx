@@ -7,6 +7,7 @@ interface GameRowProps {
   targetWords: string[];
   isCurrentRow: boolean;
   isSubmitted: boolean;
+  rowIndex: number;
   selectedPosition?: number;
   onTileClick?: (position: number) => void;
 }
@@ -16,6 +17,7 @@ export const GameRow: React.FC<GameRowProps> = ({
   targetWords,
   isCurrentRow,
   isSubmitted,
+  rowIndex,
   selectedPosition,
   onTileClick
 }) => {
@@ -31,6 +33,8 @@ export const GameRow: React.FC<GameRowProps> = ({
             position={index}
             isCurrentRow={isCurrentRow}
             isSubmitted={isSubmitted}
+            tileIndex={index}
+            rowIndex={rowIndex}
             isSelected={isCurrentRow && selectedPosition === index}
             onClick={() => isCurrentRow && onTileClick?.(index)}
             fullWord={word}

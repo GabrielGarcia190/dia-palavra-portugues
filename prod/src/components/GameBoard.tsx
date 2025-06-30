@@ -10,7 +10,9 @@ interface GameBoardProps {
   targetWords: string[];
   gameStatus: GameStatus;
   selectedPosition: number;
+  activeGrid: number;
   onTileClick: (position: number) => void;
+  onGridClick: (gridIndex: number) => void;
   gameMode: GameMode;
   MAX_GUESSES: number;
 }

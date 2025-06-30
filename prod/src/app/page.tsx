@@ -12,16 +12,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { Button } from '@/components/ui/button';
 
 export default function Home() {
-  const {
+   const {
     guesses,
     currentGuess,
     gameStatus,
     currentRow,
     letterStatuses,
     selectedPosition,
+    activeGrid,
     targetWords,
     handleKeyPress,
     handleTileClick,
+    handleGridClick,
     handleLetterInput,
     handleBackspaceAtPosition,
     resetGame,
@@ -88,7 +90,7 @@ export default function Home() {
   };
 
   return (
-   <div className={`min-h-screen transition-colors duration-300 ${
+ <div className={`min-h-screen transition-colors duration-300 ${
       // 4. Aplica dark mode apenas após montagem para evitar mismatch
       isMounted && darkMode ? 'dark bg-gray-900' : 'bg-gray-50'
     }`}>
@@ -140,7 +142,9 @@ export default function Home() {
             targetWords={targetWords}
             gameStatus={gameStatus}
             selectedPosition={selectedPosition}
+            activeGrid={activeGrid}
             onTileClick={handleTileClick}
+            onGridClick={handleGridClick}
             gameMode={gameMode}
             MAX_GUESSES={MAX_GUESSES}
           />
