@@ -66,7 +66,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 p-4 border-t border-gray-200 dark:border-gray-700">
+    <div className="fixed bottom-0 left-0 right-0 bg-brackound p-4 border-t border-gray-200 dark:border-gray-700">
       <div className="max-w-lg mx-auto space-y-2">
         {KEYBOARD_ROWS.map((row, rowIndex) => (
           <div key={rowIndex} className="flex gap-1 justify-center">
