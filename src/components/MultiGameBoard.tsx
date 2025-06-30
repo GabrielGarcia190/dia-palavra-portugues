@@ -62,16 +62,16 @@ export const MultiGameBoard: React.FC<MultiGameBoardProps> = ({
   const totalGrids = gameMode === 'double' ? 2 : 4;
 
   return (
-    <div className="w-full max-w-6xl mx-auto mb-8">
-      <div className={`grid ${
+    <div className="w-full mb-8">
+      <div className={`${
         gameMode === 'double' 
-          ? 'grid-cols-2 gap-8' 
-          : 'grid-cols-2 lg:grid-cols-4 gap-3'
+          ? 'max-w-4xl mx-auto grid grid-cols-2 gap-12' 
+          : 'max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4'
       }`}>
         {Array.from({ length: totalGrids }, (_, gridIndex) => (
           <div
             key={gridIndex}
-            className="cursor-pointer"
+            className="flex flex-col items-center"
           >
             <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3 text-center">
               Palavra {gridIndex + 1}
